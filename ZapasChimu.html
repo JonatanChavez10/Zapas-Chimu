@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zapas Chimú - Catálogo Oficial</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f0f12',
+                            card: '#18181c',
+                            accent: '#8b5cf6', // Violeta Neón
+                            accentHover: '#7c3aed',
+                            green: '#22c55e',   // WhatsApp Green
+                            greenHover: '#16a34a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f12;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom Scrollbar for Talle pills */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 bg-brand-accent text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-white/20">
+        <i class="fa-solid fa-circle-check text-xl"></i>
+        <span id="toast-message" class="font-medium text-sm">Notificación</span>
+    </div>
+
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-40 bg-brand-dark/95 backdrop-blur-md border-b border-white/10 px-4 py-3 shadow-lg">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            
+            <!-- Brand & Admin Button -->
+            <div class="w-full sm:w-auto flex items-center justify-between">
+                <a href="#" onclick="resetFilters()" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/30 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-shoe-prints text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-violet-400">
+                            ZAPAS CHIMÚ
+                        </h1>
+                        <p class="text-[10px] text-gray-400 font-semibold tracking-widest uppercase">Catálogo Importado</p>
+                    </div>
+                </a>
+
+                <!-- Toggle Admin Panel Button (Mobile & Desktop) -->
+                <button onclick="toggleAdminModal()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-gray-200 border border-white/10 transition flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-violet-400"></i>
+                    <span>Modo Dueño</span>
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="w-full sm:w-80 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Buscar Nike, Adidas, Jordan..." 
+                    class="w-full pl-9 pr-4 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- Announcement Banner -->
+        <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-violet-900/40 via-purple-900/20 to-brand-card border border-violet-500/20 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-violet-500/20 text-violet-400 rounded-xl">
+                    <i class="fa-solid fa-bell text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-white text-sm sm:text-base">Catálogo Actualizado de la Semana</h2>
+                    <p class="text-xs text-gray-400">Hacé tu pedido directo a nuestro WhatsApp sin descargar fotos en tu celular.</p>
+                </div>
+            </div>
+            <a href="#catalogo" class="text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl transition shadow-lg shadow-violet-600/30 whitespace-nowrap">
+                Ver Todo el Stock
+            </a>
+        </div>
+
+        <!-- Filter Controls -->
+        <section class="mb-6 space-y-4">
+            
+            <!-- Brands Selector -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">Marca:</span>
+                <button onclick="setBrandFilter('ALL')" id="brand-btn-ALL" class="brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-brand-accent text-white shadow-md">Todas</button>
+                <button onclick="setBrandFilter('Nike')" id="brand-btn-Nike" class="brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Nike</button>
+                <button onclick="setBrandFilter('Adidas')" id="brand-btn-Adidas" class="brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Adidas</button>
+                <button onclick="setBrandFilter('Jordan')" id="brand-btn-Jordan" class="brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Jordan</button>
+                <button onclick="setBrandFilter('Puma')" id="brand-btn-Puma" class="brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Puma</button>
+            </div>
+
+            <!-- Talles Selector -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">Talle AR:</span>
+                <button onclick="setTalleFilter('ALL')" id="talle-btn-ALL" class="talle-filter-btn px-3 py-1 rounded-lg text-xs font-semibold transition bg-white/20 text-white">Todos</button>
+                <script>
+                    for(let i=37; i<=45; i++){
+                        document.write(`<button onclick="setTalleFilter(${i})" id="talle-btn-${i}" class="talle-filter-btn px-3 py-1 rounded-lg text-xs font-semibold transition bg-white/5 hover:bg-white/10 text-gray-400 border border-white/10">${i}</button>`);
+                    }
+                </script>
+            </div>
+        </section>
+
+        <!-- Catalog Grid -->
+        <section id="catalogo">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-gray-200 flex items-center gap-2">
+                    <span>Modelos Disponibles</span>
+                    <span id="product-count" class="text-xs font-normal bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">0</span>
+                </h3>
+            </div>
+
+            <!-- Empty State -->
+            <div id="no-results" class="hidden text-center py-16 px-4 bg-brand-card rounded-2xl border border-white/5">
+                <i class="fa-solid fa-ghost text-4xl text-gray-600 mb-3"></i>
+                <h4 class="text-lg font-bold text-gray-300">No encontramos zapatillas</h4>
+                <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1">Probá cambiando la búsqueda o los filtros de talle y marca.</p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-violet-600/30 text-violet-300 hover:bg-violet-600/50 rounded-xl text-xs font-semibold transition">
+                    Restablecer Filtros
+                </button>
+            </div>
+
+            <!-- Grid -->
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- JavaScript will populate products here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark border-t border-white/10 py-6 px-4 text-center text-xs text-gray-500">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p>© 2026 <strong class="text-gray-300">Zapas Chimú</strong> - El mejor catálogo urbano.</p>
+            <p class="text-[11px] text-gray-600">Catálogo web optimizado para velocidad y ahorro de memoria.</p>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp General Button -->
+    <a href="https://wa.me/5491100000000?text=Hola%20Zapas%20Chimú,%20tengo%20una%20consulta%20general" target="_blank" 
+       class="fixed bottom-5 right-5 z-40 bg-brand-green hover:bg-brand-greenHover text-white p-4 rounded-full shadow-2xl transition hover:scale-110 flex items-center justify-center">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+    </a>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-brand-card w-full max-w-lg rounded-2xl border border-white/10 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            
+            <!-- Close Modal -->
+            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-2 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-violet-600/20 text-violet-400 flex items-center justify-center">
+                    <i class="fa-solid fa-sliders text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Panel del Dueño</h3>
+                    <p class="text-xs text-gray-400">Cargá o modificá tus zapatillas en segundos</p>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form id="productForm" onsubmit="saveProduct(event)" class="space-y-4">
+                <input type="hidden" id="editProductId" value="">
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Nombre del Modelo</label>
+                    <input type="text" id="pName" required placeholder="Ej: Air Force 1 Black & White" 
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-brand-accent">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">Marca</label>
+                        <select id="pBrand" required class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-brand-accent">
+                            <option value="Nike" class="bg-brand-card">Nike</option>
+                            <option value="Adidas" class="bg-brand-card">Adidas</option>
+                            <option value="Jordan" class="bg-brand-card">Jordan</option>
+                            <option value="Puma" class="bg-brand-card">Puma</option>
+                            <option value="Otras" class="bg-brand-card">Otras</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">Precio ($ ARS)</label>
+                        <input type="number" id="pPrice" required placeholder="Ej: 45000" 
+                            class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-brand-accent">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Talles Disponibles (Separados por coma)</label>
+                    <input type="text" id="pSizes" required placeholder="Ej: 38, 39, 40, 41, 42" 
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-brand-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">URL de la Imagen (Link directo de foto)</label>
+                    <input type="url" id="pImg" required placeholder="https://..." 
+                        class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-brand-accent">
+                    <p class="text-[10px] text-gray-500 mt-1">Tip: Podés usas links de Imgur, Pinterest o fotos públicas.</p>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-brand-accent hover:bg-brand-accentHover text-white py-2.5 rounded-xl text-sm font-bold transition shadow-lg shadow-violet-600/30">
+                        <i class="fa-solid fa-plus mr-1"></i> Guardar Producto
+                    </button>
+                    <button type="button" onclick="resetForm()" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-gray-300 rounded-xl text-sm font-semibold transition">
+                        Limpiar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Reset to Defaults Action -->
+            <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                <span class="text-xs text-gray-500">¿Querés reiniciar las fotos de muestra?</span>
+                <button onclick="restoreDefaults()" class="text-xs text-red-400 hover:text-red-300 font-semibold underline">
+                    Cargar datos de prueba
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Number Phone for WhatsApp Orders (Replace with actual phone if needed)
+        const WHATSAPP_PHONE = "5491100000000"; 
+
+        // Initial Mock Catalog
+        const initialProducts = [
+            {
+                id: "1",
+                name: "Nike Air Force 1 Low Triple White",
+                brand: "Nike",
+                price: 48000,
+                sizes: [38, 39, 40, 41, 42, 43],
+                image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600",
+                inStock: true
+            },
+            {
+                id: "2",
+                name: "Jordan 1 Retro High Chicago",
+                brand: "Jordan",
+                price: 55000,
+                sizes: [40, 41, 42, 44],
+                image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&q=80&w=600",
+                inStock: true
+            },
+            {
+                id: "3",
+                name: "Adidas Forum Low White Blue",
+                brand: "Adidas",
+                price: 46000,
+                sizes: [37, 38, 39, 41, 42],
+                image: "https://images.unsplash.com/photo-1518002171953-a080ee817e1f?auto=format&fit=crop&q=80&w=600",
+                inStock: true
+            },
+            {
+                id: "4",
+                name: "Nike Dunk Low Panda Black/White",
+                brand: "Nike",
+                price: 50000,
+                sizes: [38, 39, 40, 41, 42, 43, 44],
+                image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?auto=format&fit=crop&q=80&w=600",
+                inStock: true
+            },
+            {
+                id: "5",
+                name: "Puma Suede Classic Black",
+                brand: "Puma",
+                price: 42000,
+                sizes: [39, 40, 41, 42],
+                image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&q=80&w=600",
+                inStock: false
+            }
+        ];
+
+        // Global State
+        let products = [];
+        let selectedBrand = 'ALL';
+        let selectedTalle = 'ALL';
+        let searchQuery = '';
+
+        // Init App
+        window.onload = function() {
+            loadProducts();
+            renderProducts();
+        };
+
+        // Load Products from LocalStorage or Default
+        function loadProducts() {
+            const stored = localStorage.getItem('zapas_chimu_products');
+            if (stored) {
+                try {
+                    products = JSON.parse(stored);
+                } catch(e) {
+                    products = [...initialProducts];
+                }
+            } else {
+                products = [...initialProducts];
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('zapas_chimu_products', JSON.stringify(products));
+        }
+
+        function restoreDefaults() {
+            if(confirm("¿Seguro que querés restaurar el catálogo de prueba original?")) {
+                products = [...initialProducts];
+                saveToLocalStorage();
+                renderProducts();
+                showToast("Catálogo restablecido con éxito");
+                toggleAdminModal();
+            }
+        }
+
+        // Render Catalog Grid
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const noResults = document.getElementById('no-results');
+            const countLabel = document.getElementById('product-count');
+
+            // Apply Filters
+            const filtered = products.filter(p => {
+                const matchesBrand = (selectedBrand === 'ALL') || (p.brand.toLowerCase() === selectedBrand.toLowerCase());
+                const matchesTalle = (selectedTalle === 'ALL') || p.sizes.includes(Number(selectedTalle));
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesBrand && matchesTalle && matchesSearch;
+            });
+
+            countLabel.textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const formattedPrice = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(p.price);
+                const sizesPills = p.sizes.map(s => `<span class="bg-white/10 text-gray-300 text-[11px] px-2 py-0.5 rounded-md font-medium">${s}</span>`).join(' ');
+
+                // Build WhatsApp Order Link
+                const waMessage = encodeURIComponent(`Hola Zapas Chimú! Quiero consultar disponibilidad del modelo: *${p.name}* (Precio: ${formattedPrice}). Talles disponibles en catálogo: [${p.sizes.join(', ')}].`);
+                const waUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${waMessage}`;
+
+                return `
+                    <div class="bg-brand-card rounded-2xl border border-white/10 overflow-hidden flex flex-col justify-between hover:border-violet-500/50 transition duration-300 shadow-xl group">
+                        <!-- Image Container -->
+                        <div class="relative aspect-square w-full bg-black/40 overflow-hidden">
+                            <img src="${p.image}" alt="${p.name}" 
+                                 onerror="this.src='https://placehold.co/600x600/18181c/ffffff?text=Zapas+Chimú'"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            
+                            <!-- Brand Badge -->
+                            <span class="absolute top-3 left-3 bg-brand-dark/80 backdrop-blur-md border border-white/10 text-xs font-bold px-2.5 py-1 rounded-lg text-violet-300">
+                                ${p.brand}
+                            </span>
+
+                            <!-- Stock Badge -->
+                            <span class="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-md ${p.inStock ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                                ${p.inStock ? 'Disponible' : 'Agotado'}
+                            </span>
+
+                            <!-- Quick Owner Actions -->
+                            <div class="absolute bottom-2 right-2 flex gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition">
+                                <button onclick="toggleStock('${p.id}')" title="Cambiar Stock" class="w-8 h-8 rounded-lg bg-black/70 hover:bg-black text-white text-xs flex items-center justify-center border border-white/20">
+                                    <i class="fa-solid fa-arrows-rotate text-yellow-400"></i>
+                                </button>
+                                <button onclick="editProduct('${p.id}')" title="Editar" class="w-8 h-8 rounded-lg bg-black/70 hover:bg-black text-white text-xs flex items-center justify-center border border-white/20">
+                                    <i class="fa-solid fa-pen text-violet-400"></i>
+                                </button>
+                                <button onclick="deleteProduct('${p.id}')" title="Eliminar" class="w-8 h-8 rounded-lg bg-black/70 hover:bg-black text-white text-xs flex items-center justify-center border border-white/20">
+                                    <i class="fa-solid fa-trash text-red-400"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Info Content -->
+                        <div class="p-4 flex flex-col justify-between flex-grow space-y-3">
+                            <div>
+                                <h4 class="font-bold text-white text-sm line-clamp-2 group-hover:text-violet-300 transition">${p.name}</h4>
+                                <div class="text-xl font-extrabold text-white mt-1">${formattedPrice}</div>
+                            </div>
+
+                            <!-- Sizes List -->
+                            <div>
+                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Talles AR:</span>
+                                <div class="flex flex-wrap gap-1">
+                                    ${sizesPills}
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp Action Button -->
+                            <a href="${p.inStock ? waUrl : '#'}" 
+                               target="${p.inStock ? '_blank' : '_self'}"
+                               class="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-lg ${p.inStock ? 'bg-brand-green hover:bg-brand-greenHover text-white shadow-green-900/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}">
+                                <i class="fa-brands fa-whatsapp text-base"></i>
+                                <span>${p.inStock ? 'Pedir por WhatsApp' : 'Consultar Reposición'}</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter Handlers
+        function filterProducts() {
+            searchQuery = document.getElementById('searchInput').value;
+            renderProducts();
+        }
+
+        function setBrandFilter(brand) {
+            selectedBrand = brand;
+            document.querySelectorAll('.brand-filter-btn').forEach(btn => {
+                btn.className = 'brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10';
+            });
+            const activeBtn = document.getElementById(`brand-btn-${brand}`);
+            if(activeBtn) {
+                activeBtn.className = 'brand-filter-btn px-4 py-1.5 rounded-xl text-xs font-bold transition bg-brand-accent text-white shadow-md';
+            }
+            renderProducts();
+        }
+
+        function setTalleFilter(talle) {
+            selectedTalle = talle;
+            document.querySelectorAll('.talle-filter-btn').forEach(btn => {
+                btn.className = 'talle-filter-btn px-3 py-1 rounded-lg text-xs font-semibold transition bg-white/5 hover:bg-white/10 text-gray-400 border border-white/10';
+            });
+            const activeBtn = document.getElementById(`talle-btn-${talle}`);
+            if(activeBtn) {
+                activeBtn.className = 'talle-filter-btn px-3 py-1 rounded-lg text-xs font-semibold transition bg-white/20 text-white';
+            }
+            renderProducts();
+        }
+
+        function resetFilters() {
+            selectedBrand = 'ALL';
+            selectedTalle = 'ALL';
+            searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            setBrandFilter('ALL');
+            setTalleFilter('ALL');
+        }
+
+        // Admin Actions (Save, Edit, Toggle Stock, Delete)
+        function toggleAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function saveProduct(event) {
+            event.preventDefault();
+            const idInput = document.getElementById('editProductId').value;
+            const name = document.getElementById('pName').value.trim();
+            const brand = document.getElementById('pBrand').value;
+            const price = parseFloat(document.getElementById('pPrice').value);
+            const sizesRaw = document.getElementById('pSizes').value;
+            const image = document.getElementById('pImg').value.trim();
+
+            const sizes = sizesRaw.split(',').map(s => parseInt(s.trim())).filter(s => !isNaN(s));
+
+            if(idInput) {
+                // Update
+                const index = products.findIndex(p => p.id === idInput);
+                if(index !== -1) {
+                    products[index] = { ...products[index], name, brand, price, sizes, image };
+                    showToast("Producto actualizado correctamente");
+                }
+            } else {
+                // Create
+                const newProduct = {
+                    id: Date.now().toString(),
+                    name,
+                    brand,
+                    price,
+                    sizes,
+                    image,
+                    inStock: true
+                };
+                products.unshift(newProduct);
+                showToast("Nuevo modelo agregado al catálogo");
+            }
+
+            saveToLocalStorage();
+            renderProducts();
+            resetForm();
+            toggleAdminModal();
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if(!product) return;
+
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('pName').value = product.name;
+            document.getElementById('pBrand').value = product.brand;
+            document.getElementById('pPrice').value = product.price;
+            document.getElementById('pSizes').value = product.sizes.join(', ');
+            document.getElementById('pImg').value = product.image;
+
+            toggleAdminModal();
+        }
+
+        function toggleStock(id) {
+            const product = products.find(p => p.id === id);
+            if(product) {
+                product.inStock = !product.inStock;
+                saveToLocalStorage();
+                renderProducts();
+                showToast(`Estado cambiado a: ${product.inStock ? 'Disponible' : 'Agotado'}`);
+            }
+        }
+
+        function deleteProduct(id) {
+            if(confirm("¿Seguro que querés eliminar esta zapatilla del catálogo?")) {
+                products = products.filter(p => p.id !== id);
+                saveToLocalStorage();
+                renderProducts();
+                showToast("Producto eliminado");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('editProductId').value = '';
+            document.getElementById('productForm').reset();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.remove('translate-y-[-150%]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-[-150%]', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
