@@ -3,44 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zapas Chimú | Catálogo Importado</title>
+  <title>Zapas Chimu | Zapatillas Importadas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .titulo-urbano {
+      text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9), 0px 0px 15px rgba(245, 158, 11, 0.3);
+    }
+  </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans">
+<body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans selection:bg-amber-500 selection:text-black">
 
   <!-- ENCABEZADO -->
-  <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-40 shadow-lg">
+  <header class="bg-gray-900/95 backdrop-blur-md border-b border-amber-500/20 sticky top-0 z-40 shadow-xl">
     <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-purple-500/30">
-          👟
-        </div>
+      <div class="flex items-center gap-4">
+        <img src="imagenes/logo.jpeg" alt="Zapas Chimú" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-xl shadow-amber-500/30 border-2 border-amber-500/60 hover:scale-105 transition duration-300">
         <div>
-          <h1 class="text-xl font-black tracking-wider text-white">ZAPAS CHIMÚ</h1>
-          <p class="text-xs text-purple-400 font-medium">CATÁLOGO IMPORTADO</p>
+          <h1 class="text-2xl font-black tracking-wider text-white italic titulo-urbano">ZAPAS CHIMÚ</h1>
+          <p class="text-xs text-amber-400 font-bold tracking-widest uppercase">Catálogo Importado</p>
         </div>
       </div>
 
-      <button id="btnAdminAuth" onclick="abrirModalAdmin()" class="bg-gray-800 hover:bg-gray-700 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition cursor-pointer">
-        <i class="fa-solid fa-lock"></i> Modo Dueño
+      <button id="btnAdminAuth" onclick="abrirModalAdmin()" class="bg-gray-800 hover:bg-gray-700 text-amber-300 border border-amber-500/30 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition cursor-pointer shadow-lg shadow-amber-500/10">
+        <i class="fa-solid fa-lock"></i> Modo Administrador
       </button>
     </div>
   </header>
 
   <!-- BANNER NOTIFICACIÓN -->
   <main class="max-w-6xl mx-auto px-4 mt-6">
-    <div class="bg-purple-900/30 border border-purple-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3">
-      <span class="text-2xl">🔔</span>
+    <div class="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3 shadow-lg">
+      <span class="text-2xl">🔥</span>
       <div>
-        <p class="text-sm font-semibold text-purple-200">Catálogo Actualizado</p>
-        <p class="text-xs text-gray-400">Hacé tu pedido directo a nuestro WhatsApp con stock al instante.</p>
+        <p class="text-sm font-black text-amber-300 uppercase tracking-wide">Catálogo Actualizado</p>
+        <p class="text-xs text-gray-400">Hacé tu pedido directo a nuestro WhatsApp.</p>
       </div>
     </div>
 
     <!-- BUSCADOR Y FILTROS -->
     <div class="space-y-4 mb-8">
-      <input type="text" id="searchInput" oninput="filtrarProductos()" placeholder="Buscar por modelo o marca..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500 transition">
+      <input type="text" id="searchInput" oninput="filtrarProductos()" placeholder="🔍 Buscar por modelo o marca..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white transition shadow-inner">
 
       <div class="flex flex-wrap gap-2 items-center" id="contenedorFiltroMarcas">
         <!-- Se generan solas las marcas -->
@@ -48,13 +51,13 @@
     </div>
 
     <!-- MODO DUEÑO / PANEL -->
-    <div id="panelAdmin" class="hidden bg-gray-900 border border-purple-500/40 rounded-2xl p-6 mb-8 shadow-2xl">
+    <div id="panelAdmin" class="hidden bg-gray-900 border border-amber-500/40 rounded-2xl p-6 mb-8 shadow-2xl">
       <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-        <h2 id="tituloFormAdmin" class="text-lg font-bold text-purple-300 flex items-center gap-2">
+        <h2 id="tituloFormAdmin" class="text-lg font-bold text-amber-300 flex items-center gap-2">
           <i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto
         </h2>
         <div class="flex gap-3 items-center">
-          <button id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-yellow-400 hover:underline cursor-pointer">Cancelar Edición</button>
+          <button id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-amber-400 hover:underline cursor-pointer">Cancelar Edición</button>
           <button onclick="cerrarSesionAdmin()" class="text-xs text-red-400 hover:underline cursor-pointer">Cerrar Sesión</button>
         </div>
       </div>
@@ -64,26 +67,26 @@
         <input type="hidden" id="pId">
         <div>
           <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo</label>
-          <input type="text" id="pNombre" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <input type="text" id="pNombre" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Marca (Escribila libremente)</label>
-          <input type="text" id="pMarca" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <input type="text" id="pMarca" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Precio ($ ARS)</label>
-          <input type="number" id="pPrecio" required placeholder="Ej: 69800" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <input type="number" id="pPrecio" required placeholder="Ej: 69800" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Talles (separados por coma)</label>
-          <input type="text" id="pTalles" required placeholder="Ej: 38, 39, 40, 41" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <input type="text" id="pTalles" required placeholder="Ej: 38, 39, 40, 41" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
         <div class="md:col-span-2">
           <label class="block text-xs text-gray-400 mb-1">URLs de Imágenes (separadas por coma)</label>
-          <input type="text" id="pFoto" required placeholder="Ej: link1.jpg, link2.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <input type="text" id="pFoto" required placeholder="Ej: link1.jpg, link2.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
           <p class="text-[10px] text-gray-500 mt-1">Pegá los enlaces separados por una coma y un espacio (sin comillas ni corchetes).</p>
         </div>
-        <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl transition text-sm cursor-pointer">
+        <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-amber-500/20">
           Guardar Producto en la Nube
         </button>
       </form>
@@ -96,9 +99,9 @@
   </main>
 
   <!-- MODAL VISOR DE IMAGEN AMPLIADA -->
-  <div id="modalImagen" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="cerrarZoom()">
+  <div id="modalImagen" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="cerrarZoom()">
     <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
-      <button onclick="cerrarZoom()" class="absolute -top-10 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-red-600 w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">&times;</button>
+      <button onclick="cerrarZoom()" class="absolute -top-12 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-amber-500 hover:text-black w-10 h-10 rounded-full flex items-center justify-center transition cursor-pointer">&times;</button>
       <img id="imgZoomAmpliada" src="" alt="Zoom Zapatilla" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-gray-800">
       <div id="galeriaMiniaturasZoom" class="flex gap-2 mt-4 overflow-x-auto max-w-full p-2"></div>
     </div>
@@ -106,7 +109,7 @@
 
   <!-- SCRIPT LÓGICA -->
   <script>
-    // CREDENCIALES FIJAS DE SUPABASE (Funcionan en cualquier dispositivo)
+    // CREDENCIALES FIJAS DE SUPABASE
     const SUPABASE_URL = "https://fvxuonzcwllousjrhjcz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_6eZrYUp7h1hraScKsZcPUw_puLaXnBg";
 
@@ -149,7 +152,7 @@
 
       contenedor.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-2 uppercase">Marca:</span>` +
         marcasUnicas.map(marca => `
-          <button onclick="filtrarMarca('${marca}')" class="btn-marca ${marcaSeleccionada.toLowerCase() === marca.toLowerCase() ? 'bg-purple-600 text-white' : 'bg-gray-900 text-gray-400 border border-gray-800'} px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+          <button onclick="filtrarMarca('${marca}')" class="btn-marca ${marcaSeleccionada.toLowerCase() === marca.toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-900 text-gray-400 border border-gray-800 hover:border-amber-500/50'} px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
             ${marca}
           </button>
         `).join('');
@@ -180,7 +183,7 @@
       const contenedorMini = document.getElementById('galeriaMiniaturasZoom');
       if (fotosActualesZoom.length > 1) {
         contenedorMini.innerHTML = fotosActualesZoom.map((url, idx) => `
-          <img src="${url}" onclick="mostrarFotoZoom(${idx})" class="w-16 h-16 object-cover rounded-lg border-2 ${idx === indice ? 'border-purple-500 scale-105' : 'border-transparent opacity-60'} cursor-pointer hover:opacity-100 transition">
+          <img src="${url}" onclick="mostrarFotoZoom(${idx})" class="w-16 h-16 object-cover rounded-xl border-2 ${idx === indice ? 'border-amber-500 scale-105' : 'border-gray-800 opacity-60'} cursor-pointer hover:opacity-100 transition">
         `).join('');
       } else {
         contenedorMini.innerHTML = '';
@@ -207,7 +210,7 @@
       });
 
       if (filtrados.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No hay productos cargados todavía. Entrá al Modo Dueño para agregar el primero.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-medium">No hay productos cargados todavía. Entrá al Modo Administrador para agregar el primero.</div>`;
         return;
       }
 
@@ -230,26 +233,26 @@
         const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} - Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
 
         return `
-          <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-purple-500/50 transition duration-300">
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition duration-300 group">
             <div>
-              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer group" onclick="abrirZoom(${fotosEscapadas}, 0)">
+              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, 0)">
                 <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
-                <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-white/10 text-xs px-2.5 py-1 rounded-full text-purple-300 font-semibold">${p.marca || 'Zapatillas'}</span>
+                <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-amber-500/30 text-xs px-3 py-1 rounded-full text-amber-300 font-black uppercase tracking-wider">${p.marca || 'Zapatillas'}</span>
                 
-                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-[10px] px-2 py-0.5 rounded-md text-white font-bold flex items-center gap-1"><i class="fa-solid fa-images"></i> ${listaFotos.length} fotos</span>` : ''}
-                <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold gap-1">
+                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-amber-300 text-xs font-bold gap-1 backdrop-blur-[2px]">
                   <i class="fa-solid fa-magnifying-glass-plus"></i> Clic para ampliar
                 </div>
               </div>
 
               <div class="p-5">
-                <h3 class="font-bold text-lg text-white mb-1">${p.nombre}</h3>
-                <p class="text-2xl font-black text-purple-400 mb-4">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
+                <h3 class="font-black text-lg text-white mb-1 tracking-tight">${p.nombre}</h3>
+                <p class="text-2xl font-black text-amber-400 mb-4 tracking-tight">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
                 
-                <p class="text-xs text-gray-400 mb-2 font-medium">SELECCIONÁ TU TALLE:</p>
+                <p class="text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider">SELECCIONÁ TU TALLE:</p>
                 <div class="flex flex-wrap gap-1.5 mb-4">
                   ${listaTalles.map(t => `
-                    <button onclick="seleccionarTalle(${p.id}, '${t}')" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${talleElegido === t ? 'bg-purple-600 text-white border-purple-500 shadow-md' : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-500'}">
+                    <button onclick="seleccionarTalle(${p.id}, '${t}')" class="px-3 py-1.5 rounded-xl text-xs font-black border transition cursor-pointer ${talleElegido === t ? 'bg-amber-500 text-black border-amber-400 shadow-md shadow-amber-500/20 scale-105' : 'bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-500'}">
                       ${t}
                     </button>
                   `).join('')}
@@ -258,13 +261,13 @@
             </div>
 
             <div class="p-5 pt-0 space-y-2">
-              <a href="${linkWp}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg">
+              <a href="${linkWp}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg shadow-emerald-600/20">
                 <i class="fa-brands fa-whatsapp text-lg"></i> Pedir por WhatsApp (${talleElegido})
               </a>
               ${esAdmin ? `
                 <div class="flex gap-2">
-                  <button onclick="cargarDatosEdicion(${p.id})" class="w-1/2 bg-blue-900/40 text-blue-300 hover:bg-blue-900/60 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">✏️ Editar</button>
-                  <button onclick="borrarProducto(${p.id})" class="w-1/2 bg-red-900/40 text-red-300 hover:bg-red-900/60 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">🗑️ Borrar</button>
+                  <button onclick="cargarDatosEdicion(${p.id})" class="w-1/2 bg-blue-950/60 text-blue-300 hover:bg-blue-900/80 border border-blue-500/30 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">✏️ Editar</button>
+                  <button onclick="borrarProducto(${p.id})" class="w-1/2 bg-red-950/60 text-red-300 hover:bg-red-900/80 border border-red-500/30 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">🗑️ Borrar</button>
                 </div>
               ` : ''}
             </div>
