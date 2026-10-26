@@ -50,27 +50,31 @@
     <!-- MODO DUEÑO / PANEL -->
     <div id="panelAdmin" class="hidden bg-gray-900 border border-purple-500/40 rounded-2xl p-6 mb-8 shadow-2xl">
       <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-        <h2 class="text-lg font-bold text-purple-300 flex items-center gap-2">
-          <i class="fa-solid fa-user-gear"></i> Panel de Administración
+        <h2 id="tituloFormAdmin" class="text-lg font-bold text-purple-300 flex items-center gap-2">
+          <i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto
         </h2>
-        <button onclick="cerrarSesionAdmin()" class="text-xs text-red-400 hover:underline cursor-pointer">Cerrar Sesión</button>
+        <div class="flex gap-3 items-center">
+          <button id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-yellow-400 hover:underline cursor-pointer">Cancelar Edición</button>
+          <button onclick="cerrarSesionAdmin()" class="text-xs text-red-400 hover:underline cursor-pointer">Cerrar Sesión</button>
+        </div>
       </div>
 
       <!-- TABS PANEL -->
       <div class="flex gap-4 mb-6 border-b border-gray-800">
-        <button id="tabProd" onclick="cambiarTab('prod')" class="pb-2 border-b-2 border-purple-500 font-bold text-sm text-purple-300 cursor-pointer">Cargar Producto</button>
+        <button id="tabProd" onclick="cambiarTab('prod')" class="pb-2 border-b-2 border-purple-500 font-bold text-sm text-purple-300 cursor-pointer">Gestión de Productos</button>
         <button id="tabCloud" onclick="cambiarTab('cloud')" class="pb-2 border-b-2 border-transparent text-sm text-gray-400 cursor-pointer">☁️ Configuración Cloud</button>
       </div>
 
       <!-- FORMULARIO PRODUCTO -->
       <form id="formProd" onsubmit="guardarProducto(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="pId">
         <div>
           <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo</label>
           <input type="text" id="pNombre" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Marca (Escribila libremente)</label>
-          <input type="text" id="pMarca" required placeholder="Ej: Nike, Adidas, Under Armour..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <input type="text" id="pMarca" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
         </div>
         <div>
           <label class="block text-xs text-gray-400 mb-1">Precio ($ ARS)</label>
@@ -84,8 +88,8 @@
           <label class="block text-xs text-gray-400 mb-1">URL Directa de la Imagen (.jpg o .png)</label>
           <input type="url" id="pFoto" required placeholder="Ej: https://i.imgur.com/xxxxxx.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
         </div>
-        <button type="submit" class="md:col-span-2 bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl transition text-sm cursor-pointer">
-          Guardar Producto
+        <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl transition text-sm cursor-pointer">
+          Guardar Producto en la Nube
         </button>
       </form>
 
@@ -114,7 +118,7 @@
 
   <!-- SCRIPT LÓGICA -->
   <script>
-    const CLAVE_DUENO = "SayJo022925*";
+    const CLAVE_DUENO = "chimu2026"; // Cambiá esto si querés otra contraseña
     const NUMERO_WHATSAPP = "5491176165797";
     let productos = [];
     let marcaSeleccionada = "Todas";
@@ -135,7 +139,7 @@
 
     function guardarConfigCloud(e) {
       e.preventDefault();
-      const url = document.getElementById('supabaseUrl').value.trim();
+      const url = document.getElementById('supabaseUrl').value.trim().replace(/\/$/, ''); // Quita barra final si la tiene
       const key = document.getElementById('supabaseKey').value.trim();
       localStorage.setItem('sp_url', url);
       localStorage.setItem('sp_key', key);
@@ -149,7 +153,7 @@
 
       if (url && key) {
         try {
-          const res = await fetch(`${url}/rest/v1/productos?select=*`, {
+          const res = await fetch(`${url}/rest/v1/productos?select=*&order=id.desc`, {
             headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
           });
           if (res.ok) {
@@ -157,21 +161,15 @@
             renderizarFiltrosMarcas();
             renderizar();
             return;
+          } else {
+            console.error("Error al conectar con Supabase:", await res.text());
           }
-        } catch (err) { console.error("Error cargando de Supabase:", err); }
+        } catch (err) { console.error("Error de red cargando de Supabase:", err); }
       }
 
+      // Si no hay Supabase configurado, usar localStorage
       const local = localStorage.getItem('zapas_local');
-      productos = local ? JSON.parse(local) : [
-        {
-          id: 1,
-          nombre: "New Balance 9060",
-          marca: "New Balance",
-          precio: 69800,
-          talles: ["38", "39", "40", "41", "42", "43"],
-          foto: "https://i.imgur.com/8Qp1X4M.jpg"
-        }
-      ];
+      productos = local ? JSON.parse(local) : [];
       renderizarFiltrosMarcas();
       renderizar();
     }
@@ -212,7 +210,7 @@
       });
 
       if (filtrados.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No se encontraron productos disponibles.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No hay productos cargados todavía. Entrá al Modo Dueño para agregar el primero.</div>`;
         return;
       }
 
@@ -256,7 +254,12 @@
               <a href="${linkWp}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg">
                 <i class="fa-brands fa-whatsapp text-lg"></i> Pedir por WhatsApp (${talleElegido})
               </a>
-              ${esAdmin ? `<button onclick="borrarProducto(${p.id})" class="w-full bg-red-900/40 text-red-300 hover:bg-red-900/60 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">Borrar Producto</button>` : ''}
+              ${esAdmin ? `
+                <div class="flex gap-2">
+                  <button onclick="cargarDatosEdicion(${p.id})" class="w-1/2 bg-blue-900/40 text-blue-300 hover:bg-blue-900/60 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">✏️ Editar</button>
+                  <button onclick="borrarProducto(${p.id})" class="w-1/2 bg-red-900/40 text-red-300 hover:bg-red-900/60 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">🗑️ Borrar</button>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -281,6 +284,7 @@
     function cerrarSesionAdmin() {
       esAdmin = false;
       document.getElementById('panelAdmin').classList.add('hidden');
+      cancelarEdicion();
       renderizar();
     }
 
@@ -298,14 +302,47 @@
       }
     }
 
+    // CARGAR DATOS EN EL FORMULARIO PARA EDITAR
+    function cargarDatosEdicion(id) {
+      const prod = productos.find(p => p.id === id);
+      if (!prod) return;
+
+      document.getElementById('pId').value = prod.id;
+      document.getElementById('pNombre').value = prod.nombre;
+      document.getElementById('pMarca').value = prod.marca;
+      document.getElementById('pPrecio').value = prod.precio;
+      document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
+      document.getElementById('pFoto').value = prod.foto;
+
+      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editando Producto #${prod.id}`;
+      document.getElementById('btnSubmitProd').innerText = "Actualizar Producto";
+      document.getElementById('btnCancelarEdicion').classList.remove('hidden');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicion() {
+      document.getElementById('formProd').reset();
+      document.getElementById('pId').value = "";
+      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto`;
+      document.getElementById('btnSubmitProd').innerText = "Guardar Producto en la Nube";
+      document.getElementById('btnCancelarEdicion').classList.add('hidden');
+    }
+
+    // GUARDAR O ACTUALIZAR PRODUCTO
     async function guardarProducto(e) {
       e.preventDefault();
-      const nuevo = {
-        nombre: document.getElementById('pNombre').value,
-        marca: document.getElementById('pMarca').value,
+      const idEditando = document.getElementById('pId').value;
+      const tallesInput = document.getElementById('pTalles').value;
+      const arrayTalles = tallesInput.split(',').map(t => t.trim()).filter(t => t !== "");
+
+      const datosProducto = {
+        nombre: document.getElementById('pNombre').value.trim(),
+        marca: document.getElementById('pMarca').value.trim(),
         precio: Number(document.getElementById('pPrecio').value),
-        talles: document.getElementById('pTalles').value.split(',').map(t => t.trim()),
-        foto: document.getElementById('pFoto').value
+        talles: arrayTalles,
+        foto: document.getElementById('pFoto').value.trim(),
+        disponible: true
       };
 
       const url = localStorage.getItem('sp_url');
@@ -313,43 +350,86 @@
 
       if (url && key) {
         try {
-          const res = await fetch(`${url}/rest/v1/productos`, {
-            method: 'POST',
-            headers: { 'apikey': key, 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevo)
-          });
+          let res;
+          if (idEditando) {
+            // Actualizar (PATCH)
+            res = await fetch(`${url}/rest/v1/productos?id=eq.${idEditando}`, {
+              method: 'PATCH',
+              headers: { 
+                'apikey': key, 
+                'Authorization': `Bearer ${key}`, 
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(datosProducto)
+            });
+          } else {
+            // Crear nuevo (POST)
+            res = await fetch(`${url}/rest/v1/productos`, {
+              method: 'POST',
+              headers: { 
+                'apikey': key, 
+                'Authorization': `Bearer ${key}`, 
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(datosProducto)
+            });
+          }
+
           if (res.ok) {
-            alert("✅ Producto subido a la nube correctamente.");
-            document.getElementById('formProd').reset();
+            alert(idEditando ? "✅ Producto actualizado con éxito en la nube." : "✅ Producto subido a la nube correctamente.");
+            cancelarEdicion();
             obtenerProductos();
             return;
+          } else {
+            const errorText = await res.text();
+            alert("❌ Error al guardar en Supabase: " + errorText);
+            return;
           }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+          console.error(err); 
+          alert("❌ Error de red al conectar con Supabase.");
+        }
+      } else {
+        // Modo local de respaldo
+        if (idEditando) {
+          productos = productos.map(p => p.id == idEditando ? { ...p, ...datosProducto } : p);
+        } else {
+          datosProducto.id = Date.now();
+          productos.push(datosProducto);
+        }
+        localStorage.setItem('zapas_local', JSON.stringify(productos));
+        cancelarEdicion();
+        renderizarFiltrosMarcas();
+        renderizar();
+        alert("✅ Guardado localmente (configurá Supabase en la otra pestaña para guardar en la nube).");
       }
-
-      nuevo.id = Date.now();
-      productos.push(nuevo);
-      localStorage.setItem('zapas_local', JSON.stringify(productos));
-      renderizarFiltrosMarcas();
-      renderizar();
-      document.getElementById('formProd').reset();
-      alert("✅ Producto guardado localmente.");
     }
 
+    // BORRAR PRODUCTO
     async function borrarProducto(id) {
-      if (!confirm("¿Seguro que querés borrar este producto?")) return;
+      if (!confirm("¿Estás seguro de que querés borrar este producto?")) return;
       const url = localStorage.getItem('sp_url');
       const key = localStorage.getItem('sp_key');
 
       if (url && key) {
-        await fetch(`${url}/rest/v1/productos?id=eq.${id}`, {
-          method: 'DELETE',
-          headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
-        });
-        obtenerProductos();
-        return;
+        try {
+          const res = await fetch(`${url}/rest/v1/productos?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+          });
+          if (res.ok) {
+            alert("🗑️ Producto borrado de la nube.");
+            obtenerProductos();
+            return;
+          } else {
+            alert("❌ No se pudo borrar el producto en Supabase.");
+          }
+        } catch (err) { console.error(err); }
       }
 
+      // Respaldo local
       productos = productos.filter(p => p.id !== id);
       localStorage.setItem('zapas_local', JSON.stringify(productos));
       renderizarFiltrosMarcas();
