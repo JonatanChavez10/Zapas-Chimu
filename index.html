@@ -373,15 +373,14 @@
       document.getElementById('pPrecio').value = prod.precio;
       document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
       
-      const fotosStr = Array.isArray(prod.foto) ? prod.foto.join(', ') : prod.foto;
-      document.getElementById('pFoto').value = fotosStr || '';
-
-      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editando Producto #${prod.id}`;
-      document.getElementById('btnSubmitProd').innerText = "Actualizar Producto";
-      document.getElementById('btnCancelarEdicion').classList.remove('hidden');
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+      // Limpia corchetes y comillas si la base los devuelve formateados
+      let fotosLimpias = "";
+      if (Array.isArray(prod.foto)) {
+        fotosLimpias = prod.foto.join(', ');
+      } else if (typeof prod.foto === 'string') {
+        fotosLimpias = prod.foto.replace(/[\[\]"]/g, '');
+      }
+      document.getElementById('pFoto').value = fotosLimpias;
 
     function cancelarEdicion() {
       document.getElementById('formProd').reset();
