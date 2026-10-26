@@ -85,8 +85,9 @@
           <input type="text" id="pTalles" required placeholder="Ej: 38, 39, 40, 41" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
         </div>
         <div class="md:col-span-2">
-          <label class="block text-xs text-gray-400 mb-1">URL Directa de la Imagen (.jpg o .png)</label>
-          <input type="url" id="pFoto" required placeholder="Ej: https://i.imgur.com/xxxxxx.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <label class="block text-xs text-gray-400 mb-1">URLs de Imágenes (separadas por coma)</label>
+          <input type="text" id="pFoto" required placeholder="Ej: https://i.postimg.cc/... , https://i.postimg.cc/..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <p class="text-[10px] text-gray-500 mt-1">Podés pegar varios enlaces separados por comas para subir más de una foto.</p>
         </div>
         <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl transition text-sm cursor-pointer">
           Guardar Producto en la Nube
@@ -116,14 +117,28 @@
     </div>
   </main>
 
+  <!-- MODAL VISOR DE IMAGEN AMPLIADA -->
+  <div id="modalImagen" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="cerrarZoom()">
+    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
+      <button onclick="cerrarZoom()" class="absolute -top-10 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-red-600 w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">&times;</button>
+      <img id="imgZoomAmpliada" src="" alt="Zoom Zapatilla" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-gray-800">
+      
+      <!-- Miniaturas para cambiar si hay varias fotos -->
+      <div id="galeriaMiniaturasZoom" class="flex gap-2 mt-4 overflow-x-auto max-w-full p-2">
+        <!-- Generadas dinámicamente -->
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPT LÓGICA -->
   <script>
-    const CLAVE_DUENO = "SayJo022925*"; // Cambiá esto si querés otra contraseña
+    const CLAVE_DUENO = "SayJo022925*";
     const NUMERO_WHATSAPP = "5491176165797";
     let productos = [];
     let marcaSeleccionada = "Todas";
     let esAdmin = false;
     let tallesSeleccionados = {};
+    let fotosActualesZoom = [];
 
     window.onload = () => {
       cargarConfiguracionCloud();
@@ -139,7 +154,7 @@
 
     function guardarConfigCloud(e) {
       e.preventDefault();
-      const url = document.getElementById('supabaseUrl').value.trim().replace(/\/$/, ''); // Quita barra final si la tiene
+      const url = document.getElementById('supabaseUrl').value.trim().replace(/\/$/, '');
       const key = document.getElementById('supabaseKey').value.trim();
       localStorage.setItem('sp_url', url);
       localStorage.setItem('sp_key', key);
@@ -161,13 +176,10 @@
             renderizarFiltrosMarcas();
             renderizar();
             return;
-          } else {
-            console.error("Error al conectar con Supabase:", await res.text());
           }
-        } catch (err) { console.error("Error de red cargando de Supabase:", err); }
+        } catch (err) { console.error("Error cargando de Supabase:", err); }
       }
 
-      // Si no hay Supabase configurado, usar localStorage
       const local = localStorage.getItem('zapas_local');
       productos = local ? JSON.parse(local) : [];
       renderizarFiltrosMarcas();
@@ -192,6 +204,39 @@
     function seleccionarTalle(idProd, talle) {
       tallesSeleccionados[idProd] = talle;
       renderizar();
+    }
+
+    // ABRIR ZOOM DE IMAGEN CON SOPORTE MULTIFOTO
+    function abrirZoom(listaFotosStr, indiceInicial = 0) {
+      if (!listaFotosStr) return;
+      if (typeof listaFotosStr === 'string') {
+        fotosActualesZoom = listaFotosStr.split(',').map(f => f.trim()).filter(f => f !== '');
+      } else if (Array.isArray(listaFotosStr)) {
+        fotosActualesZoom = listaFotosStr;
+      }
+
+      if (fotosActualesZoom.length === 0) return;
+
+      mostrarFotoZoom(indiceInicial);
+      document.getElementById('modalImagen').classList.remove('hidden');
+    }
+
+    function mostrarFotoZoom(indice) {
+      const imgElem = document.getElementById('imgZoomAmpliada');
+      imgElem.src = fotosActualesZoom[indice];
+
+      const contenedorMini = document.getElementById('galeriaMiniaturasZoom');
+      if (fotosActualesZoom.length > 1) {
+        contenedorMini.innerHTML = fotosActualesZoom.map((url, idx) => `
+          <img src="${url}" onclick="mostrarFotoZoom(${idx})" class="w-16 h-16 object-cover rounded-lg border-2 ${idx === indice ? 'border-purple-500 scale-105' : 'border-transparent opacity-60'} cursor-pointer hover:opacity-100 transition">
+        `).join('');
+      } else {
+        contenedorMini.innerHTML = '';
+      }
+    }
+
+    function cerrarZoom() {
+      document.getElementById('modalImagen').classList.add('hidden');
     }
 
     function renderizar() {
@@ -222,6 +267,16 @@
           listaTalles = p.talles.split(',').map(t => t.trim());
         }
 
+        // Manejo de múltiples fotos (guarda string o array)
+        let listaFotos = [];
+        if (Array.isArray(p.foto)) {
+          listaFotos = p.foto;
+        } else if (typeof p.foto === 'string') {
+          listaFotos = p.foto.split(',').map(f => f.trim()).filter(f => f !== '');
+        }
+        const fotoPrincipal = listaFotos[0] || 'https://via.placeholder.com/400x400?text=Foto+No+Disponible';
+        const fotosJsonEscapadas = JSON.stringify(listaFotos).replace(/"/g, '&quot;');
+
         if (!tallesSeleccionados[p.id] && listaTalles.length > 0) {
           tallesSeleccionados[p.id] = listaTalles[0];
         }
@@ -231,10 +286,16 @@
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-purple-500/50 transition duration-300">
             <div>
-              <div class="relative h-64 bg-gray-950 overflow-hidden">
-                <img src="${p.foto}" alt="${p.nombre}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
+              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer group" onclick="abrirZoom(${fotosJsonEscapadas}, 0)">
+                <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
                 <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-white/10 text-xs px-2.5 py-1 rounded-full text-purple-300 font-semibold">${p.marca || 'Zapatillas'}</span>
+                
+                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-[10px] px-2 py-0.5 rounded-md text-white font-bold flex items-center gap-1"><i class="fa-solid fa-images"></i> ${listaFotos.length} fotos</span>` : ''}
+                <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold gap-1">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i> Clic para ampliar
+                </div>
               </div>
+
               <div class="p-5">
                 <h3 class="font-bold text-lg text-white mb-1">${p.nombre}</h3>
                 <p class="text-2xl font-black text-purple-400 mb-4">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
@@ -302,7 +363,6 @@
       }
     }
 
-    // CARGAR DATOS EN EL FORMULARIO PARA EDITAR
     function cargarDatosEdicion(id) {
       const prod = productos.find(p => p.id === id);
       if (!prod) return;
@@ -312,7 +372,9 @@
       document.getElementById('pMarca').value = prod.marca;
       document.getElementById('pPrecio').value = prod.precio;
       document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
-      document.getElementById('pFoto').value = prod.foto;
+      
+      const fotosStr = Array.isArray(prod.foto) ? prod.foto.join(', ') : prod.foto;
+      document.getElementById('pFoto').value = fotosStr || '';
 
       document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editando Producto #${prod.id}`;
       document.getElementById('btnSubmitProd').innerText = "Actualizar Producto";
@@ -329,19 +391,21 @@
       document.getElementById('btnCancelarEdicion').classList.add('hidden');
     }
 
-    // GUARDAR O ACTUALIZAR PRODUCTO
     async function guardarProducto(e) {
       e.preventDefault();
       const idEditando = document.getElementById('pId').value;
       const tallesInput = document.getElementById('pTalles').value;
       const arrayTalles = tallesInput.split(',').map(t => t.trim()).filter(t => t !== "");
 
+      const fotosInput = document.getElementById('pFoto').value;
+      const arrayFotos = fotosInput.split(',').map(f => f.trim()).filter(f => f !== "");
+
       const datosProducto = {
         nombre: document.getElementById('pNombre').value.trim(),
         marca: document.getElementById('pMarca').value.trim(),
         precio: Number(document.getElementById('pPrecio').value),
         talles: arrayTalles,
-        foto: document.getElementById('pFoto').value.trim(),
+        foto: arrayFotos.length > 1 ? arrayFotos : (arrayFotos[0] || ''),
         disponible: true
       };
 
@@ -352,7 +416,6 @@
         try {
           let res;
           if (idEditando) {
-            // Actualizar (PATCH)
             res = await fetch(`${url}/rest/v1/productos?id=eq.${idEditando}`, {
               method: 'PATCH',
               headers: { 
@@ -364,7 +427,6 @@
               body: JSON.stringify(datosProducto)
             });
           } else {
-            // Crear nuevo (POST)
             res = await fetch(`${url}/rest/v1/productos`, {
               method: 'POST',
               headers: { 
@@ -392,7 +454,6 @@
           alert("❌ Error de red al conectar con Supabase.");
         }
       } else {
-        // Modo local de respaldo
         if (idEditando) {
           productos = productos.map(p => p.id == idEditando ? { ...p, ...datosProducto } : p);
         } else {
@@ -403,11 +464,10 @@
         cancelarEdicion();
         renderizarFiltrosMarcas();
         renderizar();
-        alert("✅ Guardado localmente (configurá Supabase en la otra pestaña para guardar en la nube).");
+        alert("✅ Guardado localmente.");
       }
     }
 
-    // BORRAR PRODUCTO
     async function borrarProducto(id) {
       if (!confirm("¿Estás seguro de que querés borrar este producto?")) return;
       const url = localStorage.getItem('sp_url');
@@ -423,13 +483,10 @@
             alert("🗑️ Producto borrado de la nube.");
             obtenerProductos();
             return;
-          } else {
-            alert("❌ No se pudo borrar el producto en Supabase.");
           }
         } catch (err) { console.error(err); }
       }
 
-      // Respaldo local
       productos = productos.filter(p => p.id !== id);
       localStorage.setItem('zapas_local', JSON.stringify(productos));
       renderizarFiltrosMarcas();
