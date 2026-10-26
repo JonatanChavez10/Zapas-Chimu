@@ -86,8 +86,8 @@
         </div>
         <div class="md:col-span-2">
           <label class="block text-xs text-gray-400 mb-1">URLs de Imágenes (separadas por coma)</label>
-          <input type="text" id="pFoto" required placeholder="Ej: https://i.postimg.cc/... , https://i.postimg.cc/..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
-          <p class="text-[10px] text-gray-500 mt-1">Podés pegar varios enlaces separados por comas para subir más de una foto.</p>
+          <input type="text" id="pFoto" required placeholder="Ej: link1.jpg, link2.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
+          <p class="text-[10px] text-gray-500 mt-1">Pegá los enlaces separados por una coma y un espacio (sin comillas ni corchetes).</p>
         </div>
         <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl transition text-sm cursor-pointer">
           Guardar Producto en la Nube
@@ -132,7 +132,7 @@
 
   <!-- SCRIPT LÓGICA -->
   <script>
-    const CLAVE_DUENO = "SayJo022925*";
+    const CLAVE_DUENO = "chimu2026";
     const NUMERO_WHATSAPP = "5491176165797";
     let productos = [];
     let marcaSeleccionada = "Todas";
@@ -206,17 +206,15 @@
       renderizar();
     }
 
-    // ABRIR ZOOM DE IMAGEN CON SOPORTE MULTIFOTO
-    function abrirZoom(listaFotosStr, indiceInicial = 0) {
-      if (!listaFotosStr) return;
-      if (typeof listaFotosStr === 'string') {
-        fotosActualesZoom = listaFotosStr.split(',').map(f => f.trim()).filter(f => f !== '');
-      } else if (Array.isArray(listaFotosStr)) {
-        fotosActualesZoom = listaFotosStr;
-      }
+    function obtenerArrayFotos(fotoField) {
+      if (!fotoField) return [];
+      let str = String(fotoField).replace(/[\[\]"]/g, '');
+      return str.split(',').map(f => f.trim()).filter(f => f !== '');
+    }
 
+    function abrirZoom(fotoField, indiceInicial = 0) {
+      fotosActualesZoom = obtenerArrayFotos(fotoField);
       if (fotosActualesZoom.length === 0) return;
-
       mostrarFotoZoom(indiceInicial);
       document.getElementById('modalImagen').classList.remove('hidden');
     }
@@ -267,15 +265,9 @@
           listaTalles = p.talles.split(',').map(t => t.trim());
         }
 
-        // Manejo de múltiples fotos (guarda string o array)
-        let listaFotos = [];
-        if (Array.isArray(p.foto)) {
-          listaFotos = p.foto;
-        } else if (typeof p.foto === 'string') {
-          listaFotos = p.foto.split(',').map(f => f.trim()).filter(f => f !== '');
-        }
+        const listaFotos = obtenerArrayFotos(p.foto);
         const fotoPrincipal = listaFotos[0] || 'https://via.placeholder.com/400x400?text=Foto+No+Disponible';
-        const fotosJsonEscapadas = JSON.stringify(listaFotos).replace(/"/g, '&quot;');
+        const fotosEscapadas = JSON.stringify(p.foto || '').replace(/"/g, '&quot;');
 
         if (!tallesSeleccionados[p.id] && listaTalles.length > 0) {
           tallesSeleccionados[p.id] = listaTalles[0];
@@ -286,7 +278,7 @@
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-purple-500/50 transition duration-300">
             <div>
-              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer group" onclick="abrirZoom(${fotosJsonEscapadas}, 0)">
+              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer group" onclick="abrirZoom(${fotosEscapadas}, 0)">
                 <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
                 <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-white/10 text-xs px-2.5 py-1 rounded-full text-purple-300 font-semibold">${p.marca || 'Zapatillas'}</span>
                 
@@ -373,14 +365,16 @@
       document.getElementById('pPrecio').value = prod.precio;
       document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
       
-      // Limpia corchetes y comillas si la base los devuelve formateados
-      let fotosLimpias = "";
-      if (Array.isArray(prod.foto)) {
-        fotosLimpias = prod.foto.join(', ');
-      } else if (typeof prod.foto === 'string') {
-        fotosLimpias = prod.foto.replace(/[\[\]"]/g, '');
-      }
-      document.getElementById('pFoto').value = fotosLimpias;
+      // Muestra las fotos limpias sin corchetes ni comillas feas
+      const listaFotos = obtenerArrayFotos(prod.foto);
+      document.getElementById('pFoto').value = listaFotos.join(', ');
+
+      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editando Producto #${prod.id}`;
+      document.getElementById('btnSubmitProd').innerText = "Actualizar Producto";
+      document.getElementById('btnCancelarEdicion').classList.remove('hidden');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     function cancelarEdicion() {
       document.getElementById('formProd').reset();
@@ -396,15 +390,17 @@
       const tallesInput = document.getElementById('pTalles').value;
       const arrayTalles = tallesInput.split(',').map(t => t.trim()).filter(t => t !== "");
 
+      // Guarda las fotos como un texto plano limpio separado por comas
       const fotosInput = document.getElementById('pFoto').value;
-      const arrayFotos = fotosInput.split(',').map(f => f.trim()).filter(f => f !== "");
+      const listaLimpia = obtenerArrayFotos(fotosInput);
+      const fotoTextoPlano = listaLimpia.join(', ');
 
       const datosProducto = {
         nombre: document.getElementById('pNombre').value.trim(),
         marca: document.getElementById('pMarca').value.trim(),
         precio: Number(document.getElementById('pPrecio').value),
         talles: arrayTalles,
-        foto: arrayFotos.length > 1 ? arrayFotos : (arrayFotos[0] || ''),
+        foto: fotoTextoPlano,
         disponible: true
       };
 
