@@ -59,12 +59,6 @@
         </div>
       </div>
 
-      <!-- TABS PANEL -->
-      <div class="flex gap-4 mb-6 border-b border-gray-800">
-        <button id="tabProd" onclick="cambiarTab('prod')" class="pb-2 border-b-2 border-purple-500 font-bold text-sm text-purple-300 cursor-pointer">Gestión de Productos</button>
-        <button id="tabCloud" onclick="cambiarTab('cloud')" class="pb-2 border-b-2 border-transparent text-sm text-gray-400 cursor-pointer">☁️ Configuración Cloud</button>
-      </div>
-
       <!-- FORMULARIO PRODUCTO -->
       <form id="formProd" onsubmit="guardarProducto(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="hidden" id="pId">
@@ -93,22 +87,6 @@
           Guardar Producto en la Nube
         </button>
       </form>
-
-      <!-- CONFIGURACIÓN SUPABASE -->
-      <form id="formCloud" onsubmit="guardarConfigCloud(event)" class="hidden space-y-4">
-        <p class="text-xs text-gray-400">Pegá aquí las credenciales de tu proyecto de Supabase:</p>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Project URL de Supabase</label>
-          <input type="text" id="supabaseUrl" placeholder="https://xxxxxx.supabase.co" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">API Key (Publishable / anon key)</label>
-          <input type="text" id="supabaseKey" placeholder="sb_publishable_..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm">
-        </div>
-        <button type="submit" class="bg-green-600 hover:bg-green-500 font-bold px-6 py-2.5 rounded-xl text-sm transition cursor-pointer">
-          Guardar Configuración Cloud
-        </button>
-      </form>
     </div>
 
     <!-- LISTA DE PRODUCTOS -->
@@ -122,16 +100,16 @@
     <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
       <button onclick="cerrarZoom()" class="absolute -top-10 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-red-600 w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">&times;</button>
       <img id="imgZoomAmpliada" src="" alt="Zoom Zapatilla" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-gray-800">
-      
-      <!-- Miniaturas para cambiar si hay varias fotos -->
-      <div id="galeriaMiniaturasZoom" class="flex gap-2 mt-4 overflow-x-auto max-w-full p-2">
-        <!-- Generadas dinámicamente -->
-      </div>
+      <div id="galeriaMiniaturasZoom" class="flex gap-2 mt-4 overflow-x-auto max-w-full p-2"></div>
     </div>
   </div>
 
   <!-- SCRIPT LÓGICA -->
   <script>
+    // CREDENCIALES FIJAS DE SUPABASE (Funcionan en cualquier dispositivo)
+    const SUPABASE_URL = "https://fvxuonzcwllousjrhjcz.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_6eZrYUp7h1hraScKsZcPUw_puLaXnBg";
+
     const CLAVE_DUENO = "chimu2026";
     const NUMERO_WHATSAPP = "5491176165797";
     let productos = [];
@@ -141,49 +119,25 @@
     let fotosActualesZoom = [];
 
     window.onload = () => {
-      cargarConfiguracionCloud();
       obtenerProductos();
     };
 
-    function cargarConfiguracionCloud() {
-      const url = localStorage.getItem('sp_url');
-      const key = localStorage.getItem('sp_key');
-      if (url && document.getElementById('supabaseUrl')) document.getElementById('supabaseUrl').value = url;
-      if (key && document.getElementById('supabaseKey')) document.getElementById('supabaseKey').value = key;
-    }
-
-    function guardarConfigCloud(e) {
-      e.preventDefault();
-      const url = document.getElementById('supabaseUrl').value.trim().replace(/\/$/, '');
-      const key = document.getElementById('supabaseKey').value.trim();
-      localStorage.setItem('sp_url', url);
-      localStorage.setItem('sp_key', key);
-      alert("✅ Configuración guardada correctamente.");
-      obtenerProductos();
-    }
-
     async function obtenerProductos() {
-      const url = localStorage.getItem('sp_url');
-      const key = localStorage.getItem('sp_key');
-
-      if (url && key) {
-        try {
-          const res = await fetch(`${url}/rest/v1/productos?select=*&order=id.desc`, {
-            headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
-          });
-          if (res.ok) {
-            productos = await res.json();
-            renderizarFiltrosMarcas();
-            renderizar();
-            return;
-          }
-        } catch (err) { console.error("Error cargando de Supabase:", err); }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?select=*&order=id.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        if (res.ok) {
+          productos = await res.json();
+          renderizarFiltrosMarcas();
+          renderizar();
+          return;
+        } else {
+          console.error("Error al conectar con Supabase:", await res.text());
+        }
+      } catch (err) { 
+        console.error("Error de red cargando de Supabase:", err); 
       }
-
-      const local = localStorage.getItem('zapas_local');
-      productos = local ? JSON.parse(local) : [];
-      renderizarFiltrosMarcas();
-      renderizar();
     }
 
     function renderizarFiltrosMarcas() {
@@ -341,20 +295,6 @@
       renderizar();
     }
 
-    function cambiarTab(tab) {
-      if (tab === 'prod') {
-        document.getElementById('formProd').classList.remove('hidden');
-        document.getElementById('formCloud').classList.add('hidden');
-        document.getElementById('tabProd').className = "pb-2 border-b-2 border-purple-500 font-bold text-sm text-purple-300 cursor-pointer";
-        document.getElementById('tabCloud').className = "pb-2 border-b-2 border-transparent text-sm text-gray-400 cursor-pointer";
-      } else {
-        document.getElementById('formProd').classList.add('hidden');
-        document.getElementById('formCloud').classList.remove('hidden');
-        document.getElementById('tabCloud').className = "pb-2 border-b-2 border-purple-500 font-bold text-sm text-purple-300 cursor-pointer";
-        document.getElementById('tabProd').className = "pb-2 border-b-2 border-transparent text-sm text-gray-400 cursor-pointer";
-      }
-    }
-
     function cargarDatosEdicion(id) {
       const prod = productos.find(p => p.id === id);
       if (!prod) return;
@@ -365,7 +305,6 @@
       document.getElementById('pPrecio').value = prod.precio;
       document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
       
-      // Muestra las fotos limpias sin corchetes ni comillas feas
       const listaFotos = obtenerArrayFotos(prod.foto);
       document.getElementById('pFoto').value = listaFotos.join(', ');
 
@@ -390,7 +329,6 @@
       const tallesInput = document.getElementById('pTalles').value;
       const arrayTalles = tallesInput.split(',').map(t => t.trim()).filter(t => t !== "");
 
-      // Guarda las fotos como un texto plano limpio separado por comas
       const fotosInput = document.getElementById('pFoto').value;
       const listaLimpia = obtenerArrayFotos(fotosInput);
       const fotoTextoPlano = listaLimpia.join(', ');
@@ -404,88 +342,61 @@
         disponible: true
       };
 
-      const url = localStorage.getItem('sp_url');
-      const key = localStorage.getItem('sp_key');
-
-      if (url && key) {
-        try {
-          let res;
-          if (idEditando) {
-            res = await fetch(`${url}/rest/v1/productos?id=eq.${idEditando}`, {
-              method: 'PATCH',
-              headers: { 
-                'apikey': key, 
-                'Authorization': `Bearer ${key}`, 
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(datosProducto)
-            });
-          } else {
-            res = await fetch(`${url}/rest/v1/productos`, {
-              method: 'POST',
-              headers: { 
-                'apikey': key, 
-                'Authorization': `Bearer ${key}`, 
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify(datosProducto)
-            });
-          }
-
-          if (res.ok) {
-            alert(idEditando ? "✅ Producto actualizado con éxito en la nube." : "✅ Producto subido a la nube correctamente.");
-            cancelarEdicion();
-            obtenerProductos();
-            return;
-          } else {
-            const errorText = await res.text();
-            alert("❌ Error al guardar en Supabase: " + errorText);
-            return;
-          }
-        } catch (err) { 
-          console.error(err); 
-          alert("❌ Error de red al conectar con Supabase.");
-        }
-      } else {
+      try {
+        let res;
         if (idEditando) {
-          productos = productos.map(p => p.id == idEditando ? { ...p, ...datosProducto } : p);
+          res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${idEditando}`, {
+            method: 'PATCH',
+            headers: { 
+              'apikey': SUPABASE_KEY, 
+              'Authorization': `Bearer ${SUPABASE_KEY}`, 
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(datosProducto)
+          });
         } else {
-          datosProducto.id = Date.now();
-          productos.push(datosProducto);
+          res = await fetch(`${SUPABASE_URL}/rest/v1/productos`, {
+            method: 'POST',
+            headers: { 
+              'apikey': SUPABASE_KEY, 
+              'Authorization': `Bearer ${SUPABASE_KEY}`, 
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(datosProducto)
+          });
         }
-        localStorage.setItem('zapas_local', JSON.stringify(productos));
-        cancelarEdicion();
-        renderizarFiltrosMarcas();
-        renderizar();
-        alert("✅ Guardado localmente.");
+
+        if (res.ok) {
+          alert(idEditando ? "✅ Producto actualizado con éxito en la nube." : "✅ Producto subido a la nube correctamente.");
+          cancelarEdicion();
+          obtenerProductos();
+        } else {
+          const errorText = await res.text();
+          alert("❌ Error al guardar en Supabase: " + errorText);
+        }
+      } catch (err) { 
+        console.error(err); 
+        alert("❌ Error de red al conectar con Supabase.");
       }
     }
 
     async function borrarProducto(id) {
       if (!confirm("¿Estás seguro de que querés borrar este producto?")) return;
-      const url = localStorage.getItem('sp_url');
-      const key = localStorage.getItem('sp_key');
 
-      if (url && key) {
-        try {
-          const res = await fetch(`${url}/rest/v1/productos?id=eq.${id}`, {
-            method: 'DELETE',
-            headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
-          });
-          if (res.ok) {
-            alert("🗑️ Producto borrado de la nube.");
-            obtenerProductos();
-            return;
-          }
-        } catch (err) { console.error(err); }
-      }
-
-      productos = productos.filter(p => p.id !== id);
-      localStorage.setItem('zapas_local', JSON.stringify(productos));
-      renderizarFiltrosMarcas();
-      renderizar();
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        if (res.ok) {
+          alert("🗑️ Producto borrado de la nube.");
+          obtenerProductos();
+        } else {
+          alert("❌ No se pudo borrar el producto.");
+        }
+      } catch (err) { console.error(err); }
     }
 
     function filtrarMarca(marca) {
