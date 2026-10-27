@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zapas Chimu | Zapatillas Importadas</title>
+  <title>Zapas Chimú | Zapatillas Importadas</title>
+  <!-- FAVICON EN LA PESTAÑA DEL NAVEGADOR -->
+  <link rel="icon" href="imagenes/logo.jpeg" type="image/jpeg">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -20,7 +22,7 @@
       <div class="flex items-center gap-4">
         <img src="imagenes/logo.jpeg" alt="Zapas Chimú" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-xl shadow-amber-500/30 border-2 border-amber-500/60 hover:scale-105 transition duration-300">
         <div>
-          <h1 class="text-2xl font-black tracking-wider text-white italic titulo-urbano">ZAPAS CHIMÚ</h1>
+          <h1 class="text-2xl font-black tracking-wider text-white italic titulo-urbano">ZAPAS CHIMU</h1>
           <p class="text-xs text-amber-400 font-bold tracking-widest uppercase">Catálogo Importado</p>
         </div>
       </div>
@@ -52,11 +54,15 @@
 
     <!-- MODO DUEÑO / PANEL -->
     <div id="panelAdmin" class="hidden bg-gray-900 border border-amber-500/40 rounded-2xl p-6 mb-8 shadow-2xl">
-      <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+      <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4 flex-wrap gap-4">
         <h2 id="tituloFormAdmin" class="text-lg font-bold text-amber-300 flex items-center gap-2">
           <i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto
         </h2>
-        <div class="flex gap-3 items-center">
+        <div class="flex gap-3 items-center flex-wrap">
+          <!-- BOTÓN MASIVO PARA PONER TODO AGOTADO -->
+          <button onclick="marcarTodosAgotados()" class="bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-500/40 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-md">
+            <i class="fa-solid fa-triangle-exclamation"></i> Marcar Todo Agotado
+          </button>
           <button id="btnCancelarEdicion" onclick="cancelarEdicion()" class="hidden text-xs text-amber-400 hover:underline cursor-pointer">Cancelar Edición</button>
           <button onclick="cerrarSesionAdmin()" class="text-xs text-red-400 hover:underline cursor-pointer">Cerrar Sesión</button>
         </div>
@@ -86,6 +92,12 @@
           <input type="text" id="pFoto" required placeholder="Ej: link1.jpg, link2.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
           <p class="text-[10px] text-gray-500 mt-1">Pegá los enlaces separados por una coma y un espacio (sin comillas ni corchetes).</p>
         </div>
+        <!-- CHECKBOX DE DISPONIBILIDAD -->
+        <div class="md:col-span-2 flex items-center gap-3 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
+          <input type="checkbox" id="pDisponible" checked class="w-5 h-5 accent-amber-500 cursor-pointer">
+          <label for="pDisponible" class="text-xs text-white font-bold cursor-pointer">Stock Disponible (Desmarcar para mostrar marca de agua de Agotado)</label>
+        </div>
+
         <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-amber-500/20">
           Guardar Producto en la Nube
         </button>
@@ -230,16 +242,29 @@
           tallesSeleccionados[p.id] = listaTalles[0];
         }
         const talleElegido = tallesSeleccionados[p.id] || (listaTalles[0] || 'A consultar');
-        const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} - Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
+        const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
+
+        // VERIFICAR DISPONIBILIDAD
+        const estaDisponible = p.disponible !== false;
 
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition duration-300 group">
             <div>
               <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, 0)">
-                <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
+                <!-- IMAGEN CON LEVE OPACIDAD SI ESTÁ AGOTADO, PERO TOTALMENTE VISIBLE -->
+                <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300 ${!estaDisponible ? 'opacity-75' : ''}" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
                 <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-amber-500/30 text-xs px-3 py-1 rounded-full text-amber-300 font-black uppercase tracking-wider">${p.marca || 'Zapatillas'}</span>
                 
-                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
+                <!-- MARCA DE AGUA DISCRETA DE AGOTADO (NO TAPA LA ZAPATILLA) -->
+                ${!estaDisponible ? `
+                  <div class="absolute bottom-3 right-3 bg-red-950/90 backdrop-blur-md border border-red-500/50 px-3 py-1 rounded-lg z-10 shadow-lg">
+                    <span class="text-red-400 font-black text-xs uppercase tracking-widest flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-xmark"></i> Agotado
+                    </span>
+                  </div>
+                ` : ''}
+
+                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 ${!estaDisponible ? 'right-28' : 'right-3'} bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-amber-300 text-xs font-bold gap-1 backdrop-blur-[2px]">
                   <i class="fa-solid fa-magnifying-glass-plus"></i> Clic para ampliar
                 </div>
@@ -261,8 +286,8 @@
             </div>
 
             <div class="p-5 pt-0 space-y-2">
-              <a href="${linkWp}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg shadow-emerald-600/20">
-                <i class="fa-brands fa-whatsapp text-lg"></i> Pedir por WhatsApp (${talleElegido})
+              <a href="${linkWp}" target="_blank" class="w-full ${estaDisponible ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-gray-700 hover:bg-gray-600'} text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg">
+                <i class="fa-brands fa-whatsapp text-lg"></i> ${estaDisponible ? `Pedir por WhatsApp (${talleElegido})` : 'Consultar Reposición'}
               </a>
               ${esAdmin ? `
                 <div class="flex gap-2">
@@ -307,6 +332,7 @@
       document.getElementById('pMarca').value = prod.marca;
       document.getElementById('pPrecio').value = prod.precio;
       document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
+      document.getElementById('pDisponible').checked = prod.disponible !== false;
       
       const listaFotos = obtenerArrayFotos(prod.foto);
       document.getElementById('pFoto').value = listaFotos.join(', ');
@@ -321,6 +347,7 @@
     function cancelarEdicion() {
       document.getElementById('formProd').reset();
       document.getElementById('pId').value = "";
+      document.getElementById('pDisponible').checked = true;
       document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto`;
       document.getElementById('btnSubmitProd').innerText = "Guardar Producto en la Nube";
       document.getElementById('btnCancelarEdicion').classList.add('hidden');
@@ -335,6 +362,7 @@
       const fotosInput = document.getElementById('pFoto').value;
       const listaLimpia = obtenerArrayFotos(fotosInput);
       const fotoTextoPlano = listaLimpia.join(', ');
+      const estaDisponible = document.getElementById('pDisponible').checked;
 
       const datosProducto = {
         nombre: document.getElementById('pNombre').value.trim(),
@@ -342,7 +370,7 @@
         precio: Number(document.getElementById('pPrecio').value),
         talles: arrayTalles,
         foto: fotoTextoPlano,
-        disponible: true
+        disponible: estaDisponible
       };
 
       try {
@@ -400,6 +428,33 @@
           alert("❌ No se pudo borrar el producto.");
         }
       } catch (err) { console.error(err); }
+    }
+
+    async function marcarTodosAgotados() {
+      if (!confirm("⚠️ ¿Estás seguro de marcar TODOS los productos como AGOTADOS? Esto pondrá en false el estado de stock de todo el catálogo.")) return;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=gt.0`, {
+          method: 'PATCH',
+          headers: { 
+            'apikey': SUPABASE_KEY, 
+            'Authorization': `Bearer ${SUPABASE_KEY}`, 
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ disponible: false })
+        });
+
+        if (res.ok) {
+          alert("✅ Todos los productos fueron marcados como agotados.");
+          obtenerProductos();
+        } else {
+          alert("❌ Hubo un error al actualizar los productos.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error de red al intentar actualizar.");
+      }
     }
 
     function filtrarMarca(marca) {
