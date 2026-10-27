@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zapas Chimú | Zapatillas Importadas</title>
-  <!-- FAVICON EN LA PESTAÑA DEL NAVEGADOR -->
-  <link rel="icon" href="imagenes/logo.jpeg" type="image/jpeg">
+  <!-- FAVICON: Cambiar a 'logo.png' cuando tengas la imagen con fondo transparente -->
+  <link rel="icon" href="imagenes/logo.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -95,7 +95,7 @@
         <!-- CHECKBOX DE DISPONIBILIDAD -->
         <div class="md:col-span-2 flex items-center gap-3 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
           <input type="checkbox" id="pDisponible" checked class="w-5 h-5 accent-amber-500 cursor-pointer">
-          <label for="pDisponible" class="text-xs text-white font-bold cursor-pointer">Stock Disponible (Desmarcar para mostrar marca de agua de Agotado)</label>
+          <label for="pDisponible" class="text-xs text-white font-bold cursor-pointer">Stock Disponible (Desmarcar para mostrar cartel de Agotado)</label>
         </div>
 
         <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-amber-500/20">
@@ -251,20 +251,22 @@
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition duration-300 group">
             <div>
               <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, 0)">
-                <!-- IMAGEN CON LEVE OPACIDAD SI ESTÁ AGOTADO, PERO TOTALMENTE VISIBLE -->
+                <!-- IMAGEN -->
                 <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300 ${!estaDisponible ? 'opacity-75' : ''}" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
+                
+                <!-- MARCA (Esquina superior izquierda) -->
                 <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-amber-500/30 text-xs px-3 py-1 rounded-full text-amber-300 font-black uppercase tracking-wider">${p.marca || 'Zapatillas'}</span>
                 
-                <!-- MARCA DE AGUA DISCRETA DE AGOTADO (NO TAPA LA ZAPATILLA) -->
+                <!-- CARTEL DE AGOTADO (Esquina superior derecha - Simétrico y limpio) -->
                 ${!estaDisponible ? `
-                  <div class="absolute bottom-3 right-3 bg-red-950/90 backdrop-blur-md border border-red-500/50 px-3 py-1 rounded-lg z-10 shadow-lg">
-                    <span class="text-red-400 font-black text-xs uppercase tracking-widest flex items-center gap-1.5">
-                      <i class="fa-solid fa-circle-xmark"></i> Agotado
-                    </span>
-                  </div>
+                  <span class="absolute top-3 right-3 bg-red-600/90 text-white font-black text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow-lg border border-red-400/50 flex items-center gap-1 z-10">
+                    <i class="fa-solid fa-circle-xmark"></i> Agotado
+                  </span>
                 ` : ''}
 
-                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 ${!estaDisponible ? 'right-28' : 'right-3'} bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
+                <!-- CONTADOR DE FOTOS (Abajo a la derecha) -->
+                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
+                
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-amber-300 text-xs font-bold gap-1 backdrop-blur-[2px]">
                   <i class="fa-solid fa-magnifying-glass-plus"></i> Clic para ampliar
                 </div>
