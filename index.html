@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zapas Chimú | Zapatillas Importadas</title>
-  <!-- FAVICON: Cambiar a 'logo.png' cuando tengas la imagen con fondo transparente -->
+  <!-- FAVICON EN LA PESTAÑA DEL NAVEGADOR -->
   <link rel="icon" href="imagenes/logo.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,9 +12,12 @@
     .titulo-urbano {
       text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9), 0px 0px 15px rgba(245, 158, 11, 0.3);
     }
+    html {
+      scroll-behavior: smooth;
+    }
   </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans selection:bg-amber-500 selection:text-black">
+<body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans selection:bg-amber-500 selection:text-black relative">
 
   <!-- ENCABEZADO -->
   <header class="bg-gray-900/95 backdrop-blur-md border-b border-amber-500/20 sticky top-0 z-40 shadow-xl">
@@ -59,7 +62,6 @@
           <i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto
         </h2>
         <div class="flex gap-3 items-center flex-wrap">
-          <!-- BOTÓN MASIVO PARA PONER TODO AGOTADO -->
           <button onclick="marcarTodosAgotados()" class="bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-500/40 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-md">
             <i class="fa-solid fa-triangle-exclamation"></i> Marcar Todo Agotado
           </button>
@@ -71,28 +73,35 @@
       <!-- FORMULARIO PRODUCTO -->
       <form id="formProd" onsubmit="guardarProducto(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="hidden" id="pId">
+        
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo</label>
-          <input type="text" id="pNombre" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+          <label class="block text-xs text-gray-400 mb-1">Marca (Elegí o escribí una nueva)</label>
+          <input type="text" id="pMarca" list="listaMarcas" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+          <datalist id="listaMarcas"></datalist>
         </div>
+
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Marca (Escribila libremente)</label>
-          <input type="text" id="pMarca" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+          <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo (Elegí o escribí uno nuevo)</label>
+          <input type="text" id="pNombre" list="listaModelos" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+          <datalist id="listaModelos"></datalist>
         </div>
+
         <div>
           <label class="block text-xs text-gray-400 mb-1">Precio ($ ARS)</label>
           <input type="number" id="pPrecio" required placeholder="Ej: 69800" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
+
         <div>
           <label class="block text-xs text-gray-400 mb-1">Talles (separados por coma)</label>
           <input type="text" id="pTalles" required placeholder="Ej: 38, 39, 40, 41" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
+
         <div class="md:col-span-2">
           <label class="block text-xs text-gray-400 mb-1">URLs de Imágenes (separadas por coma)</label>
           <input type="text" id="pFoto" required placeholder="Ej: link1.jpg, link2.jpg" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
-          <p class="text-[10px] text-gray-500 mt-1">Pegá los enlaces separados por una coma y un espacio (sin comillas ni corchetes).</p>
+          <p class="text-[10px] text-gray-500 mt-1">Pegá los enlaces separados por una coma y un espacio.</p>
         </div>
-        <!-- CHECKBOX DE DISPONIBILIDAD -->
+
         <div class="md:col-span-2 flex items-center gap-3 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
           <input type="checkbox" id="pDisponible" checked class="w-5 h-5 accent-amber-500 cursor-pointer">
           <label for="pDisponible" class="text-xs text-white font-bold cursor-pointer">Stock Disponible (Desmarcar para mostrar cartel de Agotado)</label>
@@ -119,23 +128,44 @@
     </div>
   </div>
 
+  <!-- BOTÓN VOLVER ARRIBA -->
+  <button id="btnVolverArriba" onclick="volverArriba()" class="fixed bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-black w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition duration-300 opacity-0 pointer-events-none cursor-pointer border-2 border-black">
+    <i class="fa-solid fa-arrow-up text-lg font-bold"></i>
+  </button>
+
   <!-- SCRIPT LÓGICA -->
   <script>
-    // CREDENCIALES FIJAS DE SUPABASE
     const SUPABASE_URL = "https://fvxuonzcwllousjrhjcz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_6eZrYUp7h1hraScKsZcPUw_puLaXnBg";
 
-    const CLAVE_DUENO = "SayJo022925*";
+    const CLAVE_DUENO = "chimu2026";
     const NUMERO_WHATSAPP = "5491176165797";
     let productos = [];
     let marcaSeleccionada = "Todas";
     let esAdmin = false;
     let tallesSeleccionados = {};
+    let varianteSeleccionada = {}; // Guarda qué variante (color) está seleccionada en cada card
     let fotosActualesZoom = [];
 
     window.onload = () => {
       obtenerProductos();
+      window.addEventListener('scroll', evaluarBotonArriba);
     };
+
+    function volverArriba() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function evaluarBotonArriba() {
+      const btn = document.getElementById('btnVolverArriba');
+      if (window.scrollY > 300) {
+        btn.classList.remove('opacity-0', 'pointer-events-none');
+        btn.classList.add('opacity-100');
+      } else {
+        btn.classList.add('opacity-0', 'pointer-events-none');
+        btn.classList.remove('opacity-100');
+      }
+    }
 
     async function obtenerProductos() {
       try {
@@ -144,6 +174,7 @@
         });
         if (res.ok) {
           productos = await res.json();
+          actualizarDatalists();
           renderizarFiltrosMarcas();
           renderizar();
           return;
@@ -153,6 +184,14 @@
       } catch (err) { 
         console.error("Error de red cargando de Supabase:", err); 
       }
+    }
+
+    function actualizarDatalists() {
+      const marcas = [...new Set(productos.map(p => p.marca ? p.marca.trim() : '').filter(m => m))];
+      const modelos = [...new Set(productos.map(p => p.nombre ? p.nombre.trim() : '').filter(m => m))];
+
+      document.getElementById('listaMarcas').innerHTML = marcas.map(m => `<option value="${m}">`).join('');
+      document.getElementById('listaModelos').innerHTML = modelos.map(m => `<option value="${m}">`).join('');
     }
 
     function renderizarFiltrosMarcas() {
@@ -172,6 +211,11 @@
 
     function seleccionarTalle(idProd, talle) {
       tallesSeleccionados[idProd] = talle;
+      renderizar();
+    }
+
+    function cambiarVarianteColor(grupoClave, prodId) {
+      varianteSeleccionada[grupoClave] = prodId;
       renderizar();
     }
 
@@ -213,6 +257,7 @@
       const busquedaInput = document.getElementById('searchInput');
       const busqueda = busquedaInput ? busquedaInput.value.toLowerCase() : '';
 
+      // 1. Filtrar productos según búsqueda y marca
       const filtrados = productos.filter(p => {
         const marca = p.marca || '';
         const nombre = p.nombre || '';
@@ -226,7 +271,24 @@
         return;
       }
 
-      grid.innerHTML = filtrados.map(p => {
+      // 2. AGRUPAR POR MARCA + NOMBRE + PRECIO
+      const grupos = {};
+      filtrados.forEach(p => {
+        const clave = `${(p.marca || '').trim().toLowerCase()}_${(p.nombre || '').trim().toLowerCase()}_${p.precio}`;
+        if (!grupos[clave]) {
+          grupos[clave] = [];
+        }
+        grupos[clave].push(p);
+      });
+
+      // 3. RENDERIZAR CADA GRUPO COMO UNA SOLA CARD
+      grid.innerHTML = Object.keys(grupos).map(claveGrupo => {
+        const variantes = grupos[claveGrupo];
+        
+        // Seleccionar qué variante mostrar dentro del grupo
+        let idActivo = varianteSeleccionada[claveGrupo];
+        let p = variantes.find(v => v.id === idActivo) || variantes[0];
+
         let listaTalles = [];
         if (Array.isArray(p.talles)) {
           listaTalles = p.talles;
@@ -244,27 +306,22 @@
         const talleElegido = tallesSeleccionados[p.id] || (listaTalles[0] || 'A consultar');
         const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
 
-        // VERIFICAR DISPONIBILIDAD
         const estaDisponible = p.disponible !== false;
 
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition duration-300 group">
             <div>
               <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, 0)">
-                <!-- IMAGEN -->
                 <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300 ${!estaDisponible ? 'opacity-75' : ''}" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
                 
-                <!-- MARCA (Esquina superior izquierda) -->
                 <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-amber-500/30 text-xs px-3 py-1 rounded-full text-amber-300 font-black uppercase tracking-wider">${p.marca || 'Zapatillas'}</span>
                 
-                <!-- CARTEL DE AGOTADO (Esquina superior derecha - Simétrico y limpio) -->
                 ${!estaDisponible ? `
                   <span class="absolute top-3 right-3 bg-red-600/90 text-white font-black text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow-lg border border-red-400/50 flex items-center gap-1 z-10">
                     <i class="fa-solid fa-circle-xmark"></i> Agotado
                   </span>
                 ` : ''}
 
-                <!-- CONTADOR DE FOTOS (Abajo a la derecha) -->
                 ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
                 
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-amber-300 text-xs font-bold gap-1 backdrop-blur-[2px]">
@@ -274,8 +331,26 @@
 
               <div class="p-5">
                 <h3 class="font-black text-lg text-white mb-1 tracking-tight">${p.nombre}</h3>
-                <p class="text-2xl font-black text-amber-400 mb-4 tracking-tight">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
+                <p class="text-2xl font-black text-amber-400 mb-3 tracking-tight">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
                 
+                <!-- PALETA DE VARIANTES / COLORES -->
+                ${variantes.length > 1 ? `
+                  <div class="mb-4">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">COLORES / OPCIONES (${variantes.length}):</p>
+                    <div class="flex flex-wrap gap-2">
+                      ${variantes.map(v => {
+                        const fotoVar = obtenerArrayFotos(v.foto)[0] || '';
+                        const esActiva = v.id === p.id;
+                        return `
+                          <button onclick="cambiarVarianteColor('${claveGrupo}', ${v.id})" class="w-9 h-9 rounded-lg border-2 overflow-hidden transition cursor-pointer ${esActiva ? 'border-amber-500 scale-110 shadow-lg shadow-amber-500/20' : 'border-gray-700 opacity-60 hover:opacity-100'}">
+                            <img src="${fotoVar}" class="w-full h-full object-cover">
+                          </button>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+
                 <p class="text-xs text-gray-400 mb-2 font-bold uppercase tracking-wider">SELECCIONÁ TU TALLE:</p>
                 <div class="flex flex-wrap gap-1.5 mb-4">
                   ${listaTalles.map(t => `
