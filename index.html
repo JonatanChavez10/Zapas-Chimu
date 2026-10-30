@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zapas Chimú | Zapatillas Importadas</title>
-  <!-- FAVICON EN LA PESTAÑA DEL NAVEGADOR -->
+  <title>Zapas Chimú | Catálogo de Zapatillas e Indumentaria</title>
   <link rel="icon" href="imagenes/logo.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,52 +14,85 @@
     html {
       scroll-behavior: smooth;
     }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans selection:bg-amber-500 selection:text-black relative">
 
-  <!-- ENCABEZADO -->
+  <!-- ENCABEZADO Y MENÚ DE CATEGORÍAS -->
   <header class="bg-gray-900/95 backdrop-blur-md border-b border-amber-500/20 sticky top-0 z-40 shadow-xl">
     <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-4">
-        <img src="imagenes/logo.jpeg" alt="Zapas Chimú" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shadow-xl shadow-amber-500/30 border-2 border-amber-500/60 hover:scale-105 transition duration-300">
+        <img src="imagenes/logo.jpeg" alt="Zapas Chimú" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shadow-xl shadow-amber-500/30 border-2 border-amber-500/60 hover:scale-105 transition duration-300">
         <div>
-          <h1 class="text-2xl font-black tracking-wider text-white italic titulo-urbano">ZAPAS CHIMU</h1>
-          <p class="text-xs text-amber-400 font-bold tracking-widest uppercase">Catálogo Importado</p>
+          <h1 class="text-xl sm:text-2xl font-black tracking-wider text-white italic titulo-urbano">ZAPAS CHIMU</h1>
+          <p class="text-[10px] sm:text-xs text-amber-400 font-bold tracking-widest uppercase">Catálogo Exclusivo</p>
         </div>
       </div>
 
-      <button id="btnAdminAuth" onclick="abrirModalAdmin()" class="bg-gray-800 hover:bg-gray-700 text-amber-300 border border-amber-500/30 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition cursor-pointer shadow-lg shadow-amber-500/10">
-        <i class="fa-solid fa-lock"></i> Modo Administrador
-      </button>
+      <div class="flex items-center gap-3">
+        <button onclick="abrirModalSugerencia()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+          <i class="fa-solid fa-lightbulb text-amber-400"></i> <span class="hidden sm:inline">Pedir Producto</span>
+        </button>
+        <button id="btnAdminAuth" onclick="abrirModalAdmin()" class="bg-gray-800 hover:bg-gray-700 text-amber-300 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer shadow-lg shadow-amber-500/10">
+          <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline">Modo Admin</span>
+        </button>
+      </div>
     </div>
+
+    <!-- NAVEGACIÓN SUPERIOR DE CATEGORÍAS -->
+    <nav class="border-t border-gray-800/80 bg-gray-950/80">
+      <div class="max-w-6xl mx-auto px-4 flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar text-xs font-bold uppercase tracking-wider">
+        <button onclick="filtrarCategoria('Todas')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap bg-amber-500 text-black shadow-md shadow-amber-500/20">Todos</button>
+        <button onclick="filtrarCategoria('Calzado')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">👟 Calzado</button>
+        <button onclick="filtrarCategoria('Indumentaria')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">👕 Indumentaria</button>
+        <button onclick="filtrarCategoria('Paraguay')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">🇵🇾 Prod. Paraguay</button>
+        <button onclick="filtrarCategoria('Importado')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">✈️ Importado</button>
+      </div>
+    </nav>
   </header>
 
-  <!-- BANNER NOTIFICACIÓN -->
   <main class="max-w-6xl mx-auto px-4 mt-6">
-    <div class="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3 shadow-lg">
-      <span class="text-2xl">🔥</span>
-      <div>
-        <p class="text-sm font-black text-amber-300 uppercase tracking-wide">Catálogo Actualizado</p>
-        <p class="text-xs text-gray-400">Hacé tu pedido directo a nuestro WhatsApp.</p>
+    <!-- BANNER DE NOTIFICACIÓN -->
+    <div class="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-4 mb-6 flex items-center justify-between gap-3 shadow-lg flex-wrap sm:flex-nowrap">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🔥</span>
+        <div>
+          <p class="text-sm font-black text-amber-300 uppercase tracking-wide">Catálogo Actualizado</p>
+          <p class="text-xs text-gray-400">Hacé tu pedido o consulta directo por WhatsApp.</p>
+        </div>
       </div>
+      <button onclick="abrirModalSugerencia()" class="text-xs font-bold text-amber-400 underline hover:text-amber-300 transition">
+        ¿Buscás un modelo en particular? Pedilo acá
+      </button>
     </div>
 
-    <!-- BUSCADOR Y FILTROS -->
+    <!-- BUSCADOR Y FILTROS VISUALES MEJORADOS (RESPONSIVE PC Y MOBILE) -->
     <div class="space-y-4 mb-8">
-      <input type="text" id="searchInput" oninput="filtrarProductos()" placeholder="🔍 Buscar por modelo o marca..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white transition shadow-inner">
+      <div class="relative">
+        <input type="text" id="searchInput" oninput="filtrarProductos()" placeholder="🔍 Buscar por modelo, marca o color..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white transition shadow-inner">
+      </div>
 
-      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-gray-900/60 p-4 rounded-2xl border border-gray-800">
-        <div class="flex flex-wrap gap-2 items-center" id="contenedorFiltroMarcas">
-          <!-- Se generan solas las marcas -->
+      <div class="bg-gray-900/60 p-4 rounded-2xl border border-gray-800 space-y-3">
+        <!-- FILTRO DE MARCAS -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="contenedorFiltroMarcas">
+          <!-- Marcas generadas dinámicamente -->
         </div>
-        <div class="flex flex-wrap gap-2 items-center" id="contenedorFiltroTalles">
-          <!-- Se generan solos los talles -->
+
+        <!-- FILTRO DE TALLES -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 border-t border-gray-800/60 pt-3" id="contenedorFiltroTalles">
+          <!-- Talles generados dinámicamente -->
         </div>
       </div>
     </div>
 
-    <!-- MODO DUEÑO / PANEL -->
+    <!-- PANEL MODO ADMINISTRADOR -->
     <div id="panelAdmin" class="hidden bg-gray-900 border border-amber-500/40 rounded-2xl p-6 mb-8 shadow-2xl">
       <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4 flex-wrap gap-4">
         <h2 id="tituloFormAdmin" class="text-lg font-bold text-amber-300 flex items-center gap-2">
@@ -75,20 +107,40 @@
         </div>
       </div>
 
-      <!-- FORMULARIO PRODUCTO -->
-      <form id="formProd" onsubmit="guardarProducto(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- FORMULARIO DE CARGA DE PRODUCTO -->
+      <form id="formProd" onsubmit="guardarProducto(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <input type="hidden" id="pId">
         
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Marca (Elegí o escribí una nueva)</label>
+          <label class="block text-xs text-gray-400 mb-1">Categoría</label>
+          <select id="pCategoria" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+            <option value="Calzado">Calzado</option>
+            <option value="Indumentaria">Indumentaria</option>
+            <option value="Paraguay">Producto de Paraguay</option>
+            <option value="Importado">Importado</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Marca</label>
           <input type="text" id="pMarca" list="listaMarcas" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
           <datalist id="listaMarcas"></datalist>
         </div>
 
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo (Elegí o escribí uno nuevo)</label>
+          <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo</label>
           <input type="text" id="pNombre" list="listaModelos" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
           <datalist id="listaModelos"></datalist>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Color / Variante</label>
+          <input type="text" id="pColor" placeholder="Ej: Negro/Blanco" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Proveedor (Interno)</label>
+          <input type="text" id="pProveedor" placeholder="Ej: Importador Directo" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
 
         <div>
@@ -97,50 +149,67 @@
         </div>
 
         <!-- GENERADOR RÁPIDO DE TALLES -->
-        <div>
+        <div class="md:col-span-3">
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs text-gray-400">Talles (Selección rápida o manual)</label>
+            <label class="block text-xs text-gray-400">Talles (Separados por coma)</label>
             <button type="button" onclick="generarRangoTalles()" class="text-[10px] text-amber-400 hover:underline cursor-pointer font-bold">⚡ Generar del 34 al 40</button>
           </div>
           <input type="text" id="pTalles" required placeholder="Ej: 35, 36, 37, 38, 39, 40" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
 
         <!-- CAJITAS DINÁMICAS DE IMÁGENES -->
-        <div class="md:col-span-2">
+        <div class="md:col-span-3">
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs text-gray-400">URLs de Imágenes (Agregá una cajita por cada foto)</label>
+            <label class="block text-xs text-gray-400">URLs de Imágenes (Una cajita por foto)</label>
             <button type="button" onclick="agregarCajaUrl()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1">
               <i class="fa-solid fa-plus"></i> Agregar otra foto
             </button>
           </div>
-          <div id="contenedorCajasUrls" class="space-y-2">
-            <!-- Se generan dinámicamente las cajitas -->
-          </div>
+          <div id="contenedorCajasUrls" class="space-y-2"></div>
         </div>
 
-        <div class="md:col-span-2 flex items-center gap-3 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
+        <div class="md:col-span-3 flex items-center gap-3 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
           <input type="checkbox" id="pDisponible" checked class="w-5 h-5 accent-amber-500 cursor-pointer">
           <label for="pDisponible" class="text-xs text-white font-bold cursor-pointer">Stock Disponible (Desmarcar para mostrar cartel de Agotado)</label>
         </div>
 
-        <button type="submit" id="btnSubmitProd" class="md:col-span-2 bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-amber-500/20">
+        <button type="submit" id="btnSubmitProd" class="md:col-span-3 bg-amber-500 hover:bg-amber-400 text-black font-black py-3 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-amber-500/20">
           Guardar Producto en la Nube
         </button>
       </form>
     </div>
 
-    <!-- LISTA DE PRODUCTOS -->
-    <div id="gridProductos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Se cargan dinámicamente -->
-    </div>
+    <!-- GRID DE PRODUCTOS -->
+    <div id="gridProductos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </main>
 
   <!-- MODAL VISOR DE IMAGEN AMPLIADA -->
   <div id="modalImagen" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="cerrarZoom()">
     <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
       <button onclick="cerrarZoom()" class="absolute -top-12 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-amber-500 hover:text-black w-10 h-10 rounded-full flex items-center justify-center transition cursor-pointer">&times;</button>
-      <img id="imgZoomAmpliada" src="" alt="Zoom Zapatilla" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-gray-800">
+      <img id="imgZoomAmpliada" src="" alt="Zoom Producto" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-gray-800">
       <div id="galeriaMiniaturasZoom" class="flex gap-2 mt-4 overflow-x-auto max-w-full p-2"></div>
+    </div>
+  </div>
+
+  <!-- MODAL SUGERENCIAS DE CLIENTES -->
+  <div id="modalSugerencia" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4" onclick="cerrarModalSugerencia()">
+    <div class="bg-gray-900 border border-amber-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl relative" onclick="event.stopPropagation()">
+      <button onclick="cerrarModalSugerencia()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">&times;</button>
+      <h3 class="text-lg font-black text-amber-300 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-paper-plane"></i> ¿Buscás un producto en especial?
+      </h3>
+      <p class="text-xs text-gray-400 mb-4">Contanos qué modelo, talle o color estás buscando y te lo conseguimos a pedido.</p>
+      
+      <div class="space-y-3">
+        <input type="text" id="sugModelo" placeholder="Modelo / Marca deseada (ej: Jordan 1 Retro High)" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+        <input type="text" id="sugTalle" placeholder="Tu talle (ej: 41)" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+        <textarea id="sugDetalle" rows="3" placeholder="Detalles adicionales o link de referencia..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white"></textarea>
+        
+        <button onclick="enviarSugerenciaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition shadow-lg">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Enviar Pedido por WhatsApp
+        </button>
+      </div>
     </div>
   </div>
 
@@ -149,25 +218,28 @@
     <i class="fa-solid fa-arrow-up text-lg font-bold"></i>
   </button>
 
-  <!-- SCRIPT LÓGICA -->
+  <!-- LÓGICA JAVASCRIPT -->
   <script>
     const SUPABASE_URL = "https://fvxuonzcwllousjrhjcz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_6eZrYUp7h1hraScKsZcPUw_puLaXnBg";
 
     const CLAVE_DUENO = "SayJo022925*";
     const NUMERO_WHATSAPP = "5491176165797";
+    
     let productos = [];
     let marcaSeleccionada = "Todas";
     let talleSeleccionado = "Todos";
+    let categoriaSeleccionada = "Todas";
     let esAdmin = false;
     let tallesSeleccionados = {};
     let varianteSeleccionada = {}; 
+    let fotoIndiceTarjeta = {}; // Controla el índice de imagen activa en cada tarjeta
     let fotosActualesZoom = [];
 
     window.onload = () => {
       obtenerProductos();
       window.addEventListener('scroll', evaluarBotonArriba);
-      agregarCajaUrl(''); // Inicializar al menos una cajita de imagen al cargar
+      agregarCajaUrl('');
     };
 
     function volverArriba() {
@@ -195,12 +267,11 @@
           actualizarDatalists();
           renderizarFiltros();
           renderizar();
-          return;
         } else {
-          console.error("Error al conectar con Supabase:", await res.text());
+          console.error("Error conectando a Supabase:", await res.text());
         }
       } catch (err) { 
-        console.error("Error de red cargando de Supabase:", err); 
+        console.error("Error de red:", err); 
       }
     }
 
@@ -213,21 +284,21 @@
     }
 
     function renderizarFiltros() {
-      // FILTRO DE MARCAS
+      // Filtro Marcas
       const contenedorMarcas = document.getElementById('contenedorFiltroMarcas');
       if (contenedorMarcas) {
         const marcas = productos.map(p => p.marca ? p.marca.trim() : '').filter(m => m !== '');
         const marcasUnicas = ["Todas", ...new Set(marcas)];
 
-        contenedorMarcas.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-2 uppercase">Marca:</span>` +
+        contenedorMarcas.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-1 uppercase whitespace-nowrap">Marca:</span>` +
           marcasUnicas.map(marca => `
-            <button onclick="filtrarMarca('${marca}')" class="btn-marca ${marcaSeleccionada.toLowerCase() === marca.toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-900 text-gray-400 border border-gray-800 hover:border-amber-500/50'} px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+            <button onclick="filtrarMarca('${marca}')" class="btn-marca ${marcaSeleccionada.toLowerCase() === marca.toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-amber-500/50'} px-3 py-1 rounded-xl text-xs font-semibold transition cursor-pointer whitespace-nowrap">
               ${marca}
             </button>
           `).join('');
       }
 
-      // FILTRO DE TALLES
+      // Filtro Talles
       const contenedorTalles = document.getElementById('contenedorFiltroTalles');
       if (contenedorTalles) {
         let todosTalles = [];
@@ -237,16 +308,15 @@
         });
         const tallesUnicos = ["Todos", ...new Set(todosTalles.filter(t => t !== ''))].sort((a,b) => a - b);
 
-        contenedorTalles.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-2 uppercase">Talle:</span>` +
+        contenedorTalles.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-1 uppercase whitespace-nowrap">Talle:</span>` +
           tallesUnicos.map(talle => `
-            <button onclick="filtrarTalle('${talle}')" class="btn-talle ${talleSeleccionado.toString().toLowerCase() === talle.toString().toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-900 text-gray-400 border border-gray-800 hover:border-amber-500/50'} px-2.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+            <button onclick="filtrarTalle('${talle}')" class="btn-talle ${talleSeleccionado.toString().toLowerCase() === talle.toString().toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-amber-500/50'} px-2.5 py-1 rounded-xl text-xs font-semibold transition cursor-pointer whitespace-nowrap">
               ${talle}
             </button>
           `).join('');
       }
     }
 
-    // GESTIÓN DE CAJITAS DINÁMICAS PARA LAS URLS DE IMÁGENES
     function agregarCajaUrl(valor = '') {
       const contenedor = document.getElementById('contenedorCajasUrls');
       const div = document.createElement('div');
@@ -264,9 +334,7 @@
       const inputs = document.querySelectorAll('.input-url-foto');
       let urls = [];
       inputs.forEach(input => {
-        if (input.value.trim() !== '') {
-          urls.push(input.value.trim());
-        }
+        if (input.value.trim() !== '') urls.push(input.value.trim());
       });
       return urls;
     }
@@ -279,9 +347,7 @@
       let inicio = parseInt(desde);
       let fin = parseInt(hasta);
       let lista = [];
-      for (let i = inicio; i <= fin; i++) {
-        lista.push(i);
-      }
+      for (let i = inicio; i <= fin; i++) lista.push(i);
       document.getElementById('pTalles').value = lista.join(', ');
     }
 
@@ -292,6 +358,20 @@
 
     function cambiarVarianteColor(grupoClave, prodId) {
       varianteSeleccionada[grupoClave] = prodId;
+      fotoIndiceTarjeta[prodId] = 0; // Reiniciar foto a la primera de la variante
+      renderizar();
+    }
+
+    // DESPLAZAR FOTOS EN LA TARJETA CON FLECHAS
+    function cambiarFotoTarjeta(e, prodId, direccion, totalFotos) {
+      e.stopPropagation(); // Evitar abrir el visor al hacer clic en la flecha
+      if (!fotoIndiceTarjeta[prodId]) fotoIndiceTarjeta[prodId] = 0;
+      
+      let nuevoIndice = fotoIndiceTarjeta[prodId] + direccion;
+      if (nuevoIndice < 0) nuevoIndice = totalFotos - 1;
+      if (nuevoIndice >= totalFotos) nuevoIndice = 0;
+      
+      fotoIndiceTarjeta[prodId] = nuevoIndice;
       renderizar();
     }
 
@@ -336,30 +416,31 @@
       const filtrados = productos.filter(p => {
         const marca = p.marca || '';
         const nombre = p.nombre || '';
+        const color = p.color || '';
+        const cat = p.categoria || 'Calzado';
         
         let listaTalles = [];
         if (Array.isArray(p.talles)) listaTalles = p.talles;
         else if (typeof p.talles === 'string') listaTalles = p.talles.split(',').map(t => t.trim());
 
+        const coincideCat = categoriaSeleccionada === "Todas" || cat.toLowerCase() === categoriaSeleccionada.toLowerCase();
         const coincideMarca = marcaSeleccionada === "Todas" || marca.toLowerCase() === marcaSeleccionada.toLowerCase();
         const coincideTalle = talleSeleccionado === "Todos" || listaTalles.some(t => t.toLowerCase() === talleSeleccionado.toLowerCase());
-        const coincideBusqueda = nombre.toLowerCase().includes(busqueda) || marca.toLowerCase().includes(busqueda);
+        const coincideBusqueda = nombre.toLowerCase().includes(busqueda) || marca.toLowerCase().includes(busqueda) || color.toLowerCase().includes(busqueda);
         
-        return coincideMarca && coincideTalle && coincideBusqueda;
+        return coincideCat && coincideMarca && coincideTalle && coincideBusqueda;
       });
 
       if (filtrados.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-medium">No hay productos que coincidan con la búsqueda.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 font-medium">No hay productos que coincidan con el filtro seleccionado.</div>`;
         return;
       }
 
-      // AGRUPAR POR MARCA + NOMBRE + PRECIO
+      // AGRUPACIÓN POR MARCA + NOMBRE + PRECIO
       const grupos = {};
       filtrados.forEach(p => {
         const clave = `${(p.marca || '').trim().toLowerCase()}_${(p.nombre || '').trim().toLowerCase()}_${p.precio}`;
-        if (!grupos[clave]) {
-          grupos[clave] = [];
-        }
+        if (!grupos[clave]) grupos[clave] = [];
         grupos[clave].push(p);
       });
 
@@ -370,53 +451,58 @@
         let p = variantes.find(v => v.id === idActivo) || variantes[0];
 
         let listaTalles = [];
-        if (Array.isArray(p.talles)) {
-          listaTalles = p.talles;
-        } else if (typeof p.talles === 'string') {
-          listaTalles = p.talles.split(',').map(t => t.trim());
-        }
+        if (Array.isArray(p.talles)) listaTalles = p.talles;
+        else if (typeof p.talles === 'string') listaTalles = p.talles.split(',').map(t => t.trim());
 
         const listaFotos = obtenerArrayFotos(p.foto);
-        const fotoPrincipal = listaFotos[0] || 'https://via.placeholder.com/400x400?text=Foto+No+Disponible';
+        const idxFotoActual = fotoIndiceTarjeta[p.id] || 0;
+        const fotoPrincipal = listaFotos[idxFotoActual] || 'https://via.placeholder.com/400x400?text=Foto+No+Disponible';
         const fotosEscapadas = JSON.stringify(p.foto || '').replace(/"/g, '&quot;');
 
         if (!tallesSeleccionados[p.id] && listaTalles.length > 0) {
           tallesSeleccionados[p.id] = listaTalles[0];
         }
         const talleElegido = tallesSeleccionados[p.id] || (listaTalles[0] || 'A consultar');
-        const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
+        const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} (Color: ${p.color || 'Estándar'}) Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
 
         const estaDisponible = p.disponible !== false;
 
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition duration-300 group">
             <div>
-              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, 0)">
+              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, ${idxFotoActual})">
                 <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300 ${!estaDisponible ? 'opacity-75' : ''}" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
                 
-                <!-- MARCA (Esquina superior izquierda) -->
+                <!-- BADGE MARCA -->
                 <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-amber-500/30 text-xs px-3 py-1 rounded-full text-amber-300 font-black uppercase tracking-wider">${p.marca || 'Zapatillas'}</span>
                 
-                <!-- CARTEL DE AGOTADO (Esquina superior derecha - Simétrico y limpio) -->
+                <!-- BADGE AGOTADO -->
                 ${!estaDisponible ? `
                   <span class="absolute top-3 right-3 bg-red-600/90 text-white font-black text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg border border-red-400/50 flex items-center gap-1 z-10">
                     <i class="fa-solid fa-circle-xmark"></i> Agotado
                   </span>
                 ` : ''}
 
-                <!-- CONTADOR DE FOTOS (Abajo a la derecha) -->
-                ${listaFotos.length > 1 ? `<span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700"><i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos</span>` : ''}
-                
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-amber-300 text-xs font-bold gap-1 backdrop-blur-[2px]">
-                  <i class="fa-solid fa-magnifying-glass-plus"></i> Clic para ampliar
-                </div>
+                <!-- FLECHAS DE NAVEGACIÓN EN FOTOS (SE MUESTRAN SI HAY MÁS DE 1 FOTO) -->
+                ${listaFotos.length > 1 ? `
+                  <button onclick="cambiarFotoTarjeta(event, ${p.id}, -1, ${listaFotos.length})" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-amber-500 hover:text-black text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition z-20">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                  </button>
+                  <button onclick="cambiarFotoTarjeta(event, ${p.id}, 1, ${listaFotos.length})" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-amber-500 hover:text-black text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition z-20">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                  </button>
+
+                  <span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700 z-10">
+                    <i class="fa-solid fa-images text-amber-400"></i> ${idxFotoActual + 1}/${listaFotos.length}
+                  </span>
+                ` : ''}
               </div>
 
               <div class="p-5">
                 <h3 class="font-black text-lg text-white mb-1 tracking-tight">${p.nombre}</h3>
                 <p class="text-2xl font-black text-amber-400 mb-3 tracking-tight">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
                 
-                <!-- PALETA DE VARIANTES / COLORES -->
+                <!-- VARIANTES / COLORES -->
                 ${variantes.length > 1 ? `
                   <div class="mb-4">
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">COLORES / OPCIONES (${variantes.length}):</p>
@@ -425,7 +511,7 @@
                         const fotoVar = obtenerArrayFotos(v.foto)[0] || '';
                         const esActiva = v.id === p.id;
                         return `
-                          <button onclick="cambiarVarianteColor('${claveGrupo}', ${v.id})" class="w-9 h-9 rounded-lg border-2 overflow-hidden transition cursor-pointer ${esActiva ? 'border-amber-500 scale-110 shadow-lg shadow-amber-500/20' : 'border-gray-700 opacity-60 hover:opacity-100'}">
+                          <button onclick="cambiarVarianteColor('${claveGrupo}', ${v.id})" class="w-9 h-9 rounded-lg border-2 overflow-hidden transition cursor-pointer ${esActiva ? 'border-amber-500 scale-110 shadow-lg shadow-amber-500/20' : 'border-gray-700 opacity-60 hover:opacity-100'}" title="${v.color || 'Color'}">
                             <img src="${fotoVar}" class="w-full h-full object-cover">
                           </button>
                         `;
@@ -466,7 +552,7 @@
         document.getElementById('panelAdmin').classList.toggle('hidden');
         return;
       }
-      const pass = prompt("Ingrese la Contraseña de Dueño:");
+      const pass = prompt("Ingrese la Contraseña de Administrador:");
       if (pass === CLAVE_DUENO) {
         esAdmin = true;
         document.getElementById('panelAdmin').classList.remove('hidden');
@@ -488,13 +574,15 @@
       if (!prod) return;
 
       document.getElementById('pId').value = prod.id;
+      document.getElementById('pCategoria').value = prod.categoria || 'Calzado';
       document.getElementById('pNombre').value = prod.nombre;
       document.getElementById('pMarca').value = prod.marca;
+      document.getElementById('pColor').value = prod.color || '';
+      document.getElementById('pProveedor').value = prod.proveedor || '';
       document.getElementById('pPrecio').value = prod.precio;
       document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
       document.getElementById('pDisponible').checked = prod.disponible !== false;
       
-      // Cargar cajitas de fotos
       const contenedor = document.getElementById('contenedorCajasUrls');
       contenedor.innerHTML = '';
       const listaFotos = obtenerArrayFotos(prod.foto);
@@ -537,8 +625,11 @@
       const estaDisponible = document.getElementById('pDisponible').checked;
 
       const datosProducto = {
+        categoria: document.getElementById('pCategoria').value,
         nombre: document.getElementById('pNombre').value.trim(),
         marca: document.getElementById('pMarca').value.trim(),
+        color: document.getElementById('pColor').value.trim(),
+        proveedor: document.getElementById('pProveedor').value.trim(),
         precio: Number(document.getElementById('pPrecio').value),
         talles: arrayTalles,
         foto: fotoTextoPlano,
@@ -572,12 +663,11 @@
         }
 
         if (res.ok) {
-          alert(idEditando ? "✅ Producto actualizado con éxito en la nube." : "✅ Producto subido a la nube correctamente.");
+          alert(idEditando ? "✅ Producto actualizado en la nube." : "✅ Producto subido correctamente.");
           cancelarEdicion();
           obtenerProductos();
         } else {
-          const errorText = await res.text();
-          alert("❌ Error al guardar en Supabase: " + errorText);
+          alert("❌ Error al guardar en Supabase: " + await res.text());
         }
       } catch (err) { 
         console.error(err); 
@@ -586,7 +676,7 @@
     }
 
     async function borrarProducto(id) {
-      if (!confirm("¿Estás seguro de que querés borrar este producto?")) return;
+      if (!confirm("¿Estás seguro de borrar este producto?")) return;
 
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`, {
@@ -603,7 +693,7 @@
     }
 
     async function marcarTodosAgotados() {
-      if (!confirm("⚠️ ¿Estás seguro de marcar TODOS los productos como AGOTADOS? Esto pondrá en false el estado de stock de todo el catálogo.")) return;
+      if (!confirm("⚠️ ¿Estás seguro de marcar TODOS los productos como AGOTADOS?")) return;
 
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=gt.0`, {
@@ -621,12 +711,21 @@
           alert("✅ Todos los productos fueron marcados como agotados.");
           obtenerProductos();
         } else {
-          alert("❌ Hubo un error al actualizar los productos.");
+          alert("❌ Error al actualizar los productos.");
         }
-      } catch (err) {
-        console.error(err);
-        alert("❌ Error de red al intentar actualizar.");
-      }
+      } catch (err) { console.error(err); }
+    }
+
+    function filtrarCategoria(cat) {
+      categoriaSeleccionada = cat;
+      document.querySelectorAll('.btn-cat').forEach(b => {
+        if (b.innerText.toLowerCase().includes(cat.toLowerCase()) || (cat === 'Todas' && b.innerText === 'Todos')) {
+          b.className = 'btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap bg-amber-500 text-black shadow-md shadow-amber-500/20';
+        } else {
+          b.className = 'btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800';
+        }
+      });
+      renderizar();
     }
 
     function filtrarMarca(marca) {
@@ -642,6 +741,30 @@
     }
 
     function filtrarProductos() { renderizar(); }
+
+    // MODAL SUGERENCIAS
+    function abrirModalSugerencia() {
+      document.getElementById('modalSugerencia').classList.remove('hidden');
+    }
+
+    function cerrarModalSugerencia() {
+      document.getElementById('modalSugerencia').classList.add('hidden');
+    }
+
+    function enviarSugerenciaWhatsApp() {
+      const mod = document.getElementById('sugModelo').value.trim();
+      const tal = document.getElementById('sugTalle').value.trim();
+      const det = document.getElementById('sugDetalle').value.trim();
+
+      if (!mod) {
+        alert("Por favor ingresá al menos el modelo o marca que buscás.");
+        return;
+      }
+
+      const mensaje = `Hola Zapas Chimú! Me gustaría encargar/consultar por un producto a pedido:%0A%0A📌 *Modelo/Marca:* ${mod}%0A📏 *Talle:* ${tal || 'A confirmar'}%0A📝 *Detalles:* ${det || 'Sin detalles adicionales'}`;
+      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${mensaje}`, '_blank');
+      cerrarModalSugerencia();
+    }
   </script>
 </body>
 </html>
