@@ -22,6 +22,8 @@
       scrollbar-width: none;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans selection:bg-amber-500 selection:text-black relative">
 
@@ -223,7 +225,6 @@
     const SUPABASE_URL = "https://fvxuonzcwllousjrhjcz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_6eZrYUp7h1hraScKsZcPUw_puLaXnBg";
 
-    const CLAVE_DUENO = "SayJo022925*";
     const NUMERO_WHATSAPP = "5491176165797";
     
     let productos = [];
@@ -547,19 +548,49 @@
       }).join('');
     }
 
-    function abrirModalAdmin() {
+    // Inicializamos el cliente oficial de Supabase Auth
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function abrirModalAdmin() {
       if (esAdmin) {
         document.getElementById('panelAdmin').classList.toggle('hidden');
         return;
       }
-      const pass = prompt("Ingrese la Contraseña de Administrador:");
-      if (pass === CLAVE_DUENO) {
+
+      // Pedimos el correo y la contraseña que registraste en Supabase
+      const email = prompt("📧 Ingrese su correo de administrador:");
+      if (!email) return;
+      const password = prompt("🔑 Ingrese su contraseña:");
+      if (!password) return;
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        });
+
+        if (error) {
+          alert("❌ Credenciales incorrectas o acceso no autorizado.");
+          return;
+        }
+
+        // Si la autenticación es exitosa, se abre el panel
         esAdmin = true;
         document.getElementById('panelAdmin').classList.remove('hidden');
+        alert("✅ ¡Bienvenido, Administrador!");
         renderizar();
-      } else if (pass !== null) {
-        alert("❌ Contraseña incorrecta.");
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error de red al intentar iniciar sesión.");
       }
+    }
+
+    async function cerrarSesionAdmin() {
+      await supabaseClient.auth.signOut(); // Cierra sesión de forma segura en Supabase
+      esAdmin = false;
+      document.getElementById('panelAdmin').classList.add('hidden');
+      cancelarEdicion();
+      renderizar();
     }
 
     function cerrarSesionAdmin() {
