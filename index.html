@@ -81,7 +81,7 @@
         <!-- FILTRO DE MARCAS -->
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="contenedorFiltroMarcas"></div>
         <!-- FILTRO DE TALLES -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 border-t border-gray-800/60 pt-3" id="contenedorFiltroTalles"></div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 border-t border-gray-800/60 pt-3 hidden" id="contenedorFiltroTalles"></div>
       </div>
     </div>
 
@@ -435,11 +435,43 @@
       if (dmod) dmod.innerHTML = modelos.map(m => `<option value="${m}">`).join('');
     }
 
+    function filtrarCategoria(cat) {
+      categoriaSeleccionada = cat;
+      // Reseteamos marcas y talles al cambiar de categoría para evitar filtros vacíos
+      marcaSeleccionada = "Todas";
+      talleSeleccionado = "Todos";
+      
+      actualizarMenuCategoriasPublico();
+      renderizarFiltros(); 
+      renderizar();
+    }
+
+    function filtrarMarca(marca) {
+      marcaSeleccionada = marca;
+      renderizarFiltros();
+      renderizar();
+    }
+
+    function filtrarTalle(talle) {
+      talleSeleccionado = talle;
+      renderizarFiltros();
+      renderizar();
+    }
+
     function renderizarFiltros() {
-      // Filtro Marcas (con flex-wrap para que bajen de línea y no se corten)
+      // Filtramos los productos según la categoría activa
+      const productosDisponiblesFiltro = productos.filter(p => {
+        let catNombre = 'Calzado';
+        const encontradaCat = listaCategorias.find(c => c.id === p.categoria_id);
+        if (encontradaCat) catNombre = encontradaCat.nombre;
+
+        return categoriaSeleccionada.toLowerCase() === "todas" || catNombre.toLowerCase() === categoriaSeleccionada.toLowerCase();
+      });
+
+      // Renderizar marcas dinámicas de esta categoría
       const contenedorMarcas = document.getElementById('contenedorFiltroMarcas');
       if (contenedorMarcas) {
-        const marcas = productos.map(p => p.marca ? p.marca.trim() : '').filter(m => m !== '');
+        const marcas = productosDisponiblesFiltro.map(p => p.marca ? p.marca.trim() : '').filter(m => m !== '');
         const marcasUnicas = ["Todas", ...new Set(marcas)];
 
         contenedorMarcas.innerHTML = `
@@ -454,26 +486,50 @@
         `;
       }
 
-      // Filtro Talles (con flex-wrap para que bajen de línea ordenadamente)
+      // Renderizar talles (Se oculta estrictamente si estamos en "Todos")
       const contenedorTalles = document.getElementById('contenedorFiltroTalles');
       if (contenedorTalles) {
-        let todosTalles = [];
-        productos.forEach(p => {
-          let t = Array.isArray(p.talles) ? p.talles : String(p.talles || '').split(',').map(x => x.trim());
-          todosTalles.push(...t);
-        });
-        const tallesUnicos = ["Todos", ...new Set(todosTalles.filter(t => t !== ''))].sort((a,b) => a - b);
+        if (categoriaSeleccionada.toLowerCase() === "todas") {
+          contenedorTalles.classList.add('hidden');
+          contenedorTalles.innerHTML = '';
+        } else {
+          contenedorTalles.classList.remove('hidden');
 
-        contenedorTalles.innerHTML = `
-          <div class="w-full flex items-center flex-wrap gap-2">
-            <span class="text-xs font-bold text-gray-400 mr-2 uppercase tracking-wider">Talle:</span>
-            ${tallesUnicos.map(talle => `
-              <button onclick="filtrarTalle('${talle}')" class="btn-talle ${talleSeleccionado.toString().toLowerCase() === talle.toString().toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/27 scale-105' : 'bg-gray-800 text-gray-300 border border-gray-700 hover:border-amber-500/50 hover:text-white'} px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
-                ${talle}
-              </button>
-            `).join('')}
-          </div>
-        `;
+          let todosTalles = [];
+          productosDisponiblesFiltro.forEach(p => {
+            let t = Array.isArray(p.talles) ? p.talles : String(p.talles || '').split(',').map(x => x.trim());
+            todosTalles.push(...t);
+          });
+          
+          const tallesCrudos = [...new Set(todosTalles.filter(t => t !== ''))];
+
+          // Separar entre numéricos y de texto (letras)
+          const tallesNumericos = tallesCrudos.filter(t => !isNaN(t)).sort((a, b) => Number(a) - Number(b));
+          
+          // Orden lógico para talles de indumentaria
+          const ordenLetras = ['xs', 's', 'm', 'l', 'xl', 'xxl', 'xxxl', 'unique', 'único'];
+          const tallesTexto = tallesCrudos.filter(t => isNaN(t)).sort((a, b) => {
+            const indexA = ordenLetras.indexOf(a.toLowerCase());
+            const indexB = ordenLetras.indexOf(b.toLowerCase());
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
+            return a.localeCompare(b);
+          });
+
+          const tallesUnicos = ["Todos", ...tallesNumericos, ...tallesTexto];
+
+          contenedorTalles.innerHTML = `
+            <div class="w-full flex items-center flex-wrap gap-2">
+              <span class="text-xs font-bold text-gray-400 mr-2 uppercase tracking-wider">Talle:</span>
+              ${tallesUnicos.map(talle => `
+                <button onclick="filtrarTalle('${talle}')" class="btn-talle ${talleSeleccionado.toString().toLowerCase() === talle.toString().toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/27 scale-105' : 'bg-gray-800 text-gray-300 border border-gray-700 hover:border-amber-500/50 hover:text-white'} px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+                  ${talle}
+                </button>
+              `).join('')}
+            </div>
+          `;
+        }
       }
     }
 
@@ -553,23 +609,6 @@
       document.getElementById('modalImagen').classList.add('hidden');
     }
 
-    function filtrarCategoria(cat) {
-      categoriaSeleccionada = cat;
-      actualizarMenuCategoriasPublico();
-      renderizar();
-    }
-
-    function filtrarMarca(marca) {
-      marcaSeleccionada = marca;
-      renderizarFiltros();
-      renderizar();
-    }
-
-    function filtrarTalle(talle) {
-      talleSeleccionado = talle;
-      renderizarFiltros();
-      renderizar();
-    }
 
     function filtrarProductos() {
       renderizar();
