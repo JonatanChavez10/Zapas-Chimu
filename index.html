@@ -23,7 +23,6 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen pb-12 font-sans selection:bg-amber-500 selection:text-black relative">
 
@@ -50,12 +49,9 @@
 
     <!-- NAVEGACIÓN SUPERIOR DE CATEGORÍAS -->
     <nav class="border-t border-gray-800/80 bg-gray-950/80">
-      <div class="max-w-6xl mx-auto px-4 flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar text-xs font-bold uppercase tracking-wider">
+      <div id="contenedorMenuCategorias" class="max-w-6xl mx-auto px-4 flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar text-xs font-bold uppercase tracking-wider">
         <button onclick="filtrarCategoria('Todas')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap bg-amber-500 text-black shadow-md shadow-amber-500/20">Todos</button>
-        <button onclick="filtrarCategoria('Calzado')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">👟 Calzado</button>
-        <button onclick="filtrarCategoria('Indumentaria')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">👕 Indumentaria</button>
-        <button onclick="filtrarCategoria('Paraguay')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">🇵🇾 Prod. Paraguay</button>
-        <button onclick="filtrarCategoria('Importado')" class="btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800">✈️ Importado</button>
+        <!-- Categorías dinámicas inyectadas por JS -->
       </div>
     </nav>
   </header>
@@ -75,7 +71,7 @@
       </button>
     </div>
 
-    <!-- BUSCADOR Y FILTROS VISUALES MEJORADOS (RESPONSIVE PC Y MOBILE) -->
+    <!-- BUSCADOR Y FILTROS -->
     <div class="space-y-4 mb-8">
       <div class="relative">
         <input type="text" id="searchInput" oninput="filtrarProductos()" placeholder="🔍 Buscar por modelo, marca o color..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 text-white transition shadow-inner">
@@ -83,14 +79,9 @@
 
       <div class="bg-gray-900/60 p-4 rounded-2xl border border-gray-800 space-y-3">
         <!-- FILTRO DE MARCAS -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="contenedorFiltroMarcas">
-          <!-- Marcas generadas dinámicamente -->
-        </div>
-
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="contenedorFiltroMarcas"></div>
         <!-- FILTRO DE TALLES -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 border-t border-gray-800/60 pt-3" id="contenedorFiltroTalles">
-          <!-- Talles generados dinámicamente -->
-        </div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 border-t border-gray-800/60 pt-3" id="contenedorFiltroTalles"></div>
       </div>
     </div>
 
@@ -109,48 +100,59 @@
         </div>
       </div>
 
-      <!-- FORMULARIO DE CARGA DE PRODUCTO -->
+      <!-- FORMULARIO DE CARGA -->
       <form id="formProd" onsubmit="guardarProducto(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <input type="hidden" id="pId">
         
+        <!-- CATEGORÍA -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">Categoría</label>
-          <select id="pCategoria" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
-            <option value="Calzado">Calzado</option>
-            <option value="Indumentaria">Indumentaria</option>
-            <option value="Paraguay">Producto de Paraguay</option>
-            <option value="Importado">Importado</option>
-          </select>
+          <select id="pCategoriaSelect" onchange="actualizarSubcategoriasAdmin()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white mb-2"></select>
+          <input type="text" id="pCategoriaNueva" placeholder="Nueva categoría..." class="hidden w-full bg-gray-800 border border-amber-500 rounded-lg p-2 text-xs text-white">
         </div>
 
+        <!-- SUBCATEGORÍA -->
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Subcategoría / Tipo</label>
+          <select id="pSubcategoriaSelect" onchange="verificarNuevaSubcategoria()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white mb-2"></select>
+          <input type="text" id="pSubcategoriaNueva" placeholder="Nueva subcategoría..." class="hidden w-full bg-gray-800 border border-amber-500 rounded-lg p-2 text-xs text-white">
+        </div>
+
+        <!-- MARCA -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">Marca</label>
           <input type="text" id="pMarca" list="listaMarcas" required placeholder="Ej: Nike, Adidas..." class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
           <datalist id="listaMarcas"></datalist>
         </div>
 
+        <!-- NOMBRE / MODELO -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">Nombre del Modelo</label>
           <input type="text" id="pNombre" list="listaModelos" required placeholder="Ej: Air Force 1" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
           <datalist id="listaModelos"></datalist>
         </div>
 
+        <!-- COLOR -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">Color / Variante</label>
-          <input type="text" id="pColor" placeholder="Ej: Negro/Blanco" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+          <select id="pColorSelect" onchange="verificarNuevoColor()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white mb-2"></select>
+          <input type="text" id="pColorNuevo" placeholder="Nuevo color..." class="hidden w-full bg-gray-800 border border-amber-500 rounded-lg p-2 text-xs text-white">
         </div>
 
+        <!-- PROVEEDOR -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">Proveedor (Interno)</label>
-          <input type="text" id="pProveedor" placeholder="Ej: Importador Directo" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
+          <select id="pProveedorSelect" onchange="verificarNuevoProveedor()" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white mb-2"></select>
+          <input type="text" id="pProveedorNuevo" placeholder="Nuevo proveedor..." class="hidden w-full bg-gray-800 border border-amber-500 rounded-lg p-2 text-xs text-white">
         </div>
 
+        <!-- PRECIO -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">Precio ($ ARS)</label>
           <input type="number" id="pPrecio" required placeholder="Ej: 69800" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
 
-        <!-- GENERADOR RÁPIDO DE TALLES -->
+        <!-- TALLES -->
         <div class="md:col-span-3">
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-400">Talles (Separados por coma)</label>
@@ -159,7 +161,7 @@
           <input type="text" id="pTalles" required placeholder="Ej: 35, 36, 37, 38, 39, 40" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white">
         </div>
 
-        <!-- CAJITAS DINÁMICAS DE IMÁGENES -->
+        <!-- IMÁGENES -->
         <div class="md:col-span-3">
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-400">URLs de Imágenes (Una cajita por foto)</label>
@@ -185,11 +187,25 @@
     <div id="gridProductos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
   </main>
 
-  <!-- MODAL VISOR DE IMAGEN AMPLIADA -->
+  <!-- MODAL VISOR DE IMAGEN AMPLIADA (CON FLECHAS Y MINIATURAS) -->
   <div id="modalImagen" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4" onclick="cerrarZoom()">
-    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
-      <button onclick="cerrarZoom()" class="absolute -top-12 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-amber-500 hover:text-black w-10 h-10 rounded-full flex items-center justify-center transition cursor-pointer">&times;</button>
-      <img id="imgZoomAmpliada" src="" alt="Zoom Producto" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-gray-800">
+    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+      <button onclick="cerrarZoom()" class="absolute -top-12 right-0 text-white text-2xl font-bold bg-gray-800 hover:bg-amber-500 hover:text-black w-10 h-10 rounded-full flex items-center justify-center transition cursor-pointer z-50">&times;</button>
+      
+      <div class="relative w-full flex items-center justify-center">
+        <!-- Flecha Izquierda Zoom -->
+        <button onclick="cambiarFotoZoom(-1)" class="absolute left-2 bg-black/70 hover:bg-amber-500 hover:text-black text-white w-10 h-10 rounded-full flex items-center justify-center transition z-30 shadow-lg">
+          <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+        
+        <img id="imgZoomAmpliada" src="" alt="Zoom Producto" class="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl border border-gray-800">
+        
+        <!-- Flecha Derecha Zoom -->
+        <button onclick="cambiarFotoZoom(1)" class="absolute right-2 bg-black/70 hover:bg-amber-500 hover:text-black text-white w-10 h-10 rounded-full flex items-center justify-center transition z-30 shadow-lg">
+          <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+      </div>
+
       <div id="galeriaMiniaturasZoom" class="flex gap-2 mt-4 overflow-x-auto max-w-full p-2"></div>
     </div>
   </div>
@@ -224,21 +240,27 @@
   <script>
     const SUPABASE_URL = "https://fvxuonzcwllousjrhjcz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_6eZrYUp7h1hraScKsZcPUw_puLaXnBg";
+    const SUPABASE_ANON_KEY = SUPABASE_KEY;
 
     const NUMERO_WHATSAPP = "5491176165797";
     
     let productos = [];
+    let listaCategorias = [];
+    let listaSubcategorias = [];
+    let listaProveedores = [];
+    let listaColores = [];
+
     let marcaSeleccionada = "Todas";
     let talleSeleccionado = "Todos";
     let categoriaSeleccionada = "Todas";
     let esAdmin = false;
     let tallesSeleccionados = {};
     let varianteSeleccionada = {}; 
-    let fotoIndiceTarjeta = {}; // Controla el índice de imagen activa en cada tarjeta
     let fotosActualesZoom = [];
+    let indiceZoomActual = 0;
 
     window.onload = () => {
-      obtenerProductos();
+      obtenerMaestrasYProductos();
       window.addEventListener('scroll', evaluarBotonArriba);
       agregarCajaUrl('');
     };
@@ -258,48 +280,181 @@
       }
     }
 
-    async function obtenerProductos() {
+    async function obtenerMaestrasYProductos() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?select=*&order=id.desc`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
-        if (res.ok) {
-          productos = await res.json();
-          actualizarDatalists();
-          renderizarFiltros();
-          renderizar();
-        } else {
-          console.error("Error conectando a Supabase:", await res.text());
-        }
-      } catch (err) { 
-        console.error("Error de red:", err); 
+        const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+        
+        // 1. Obtener Tablas Maestras
+        const [resCat, resSub, resProv, resCol, resProd] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/categorias?select=*`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/subcategorias?select=*`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/proveedores?select=*`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/colores?select=*`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/productos?select=*&order=id.desc`, { headers })
+        ]);
+
+        if (resCat.ok) listaCategorias = await resCat.json();
+        if (resSub.ok) listaSubcategorias = await resSub.json();
+        if (resProv.ok) listaProveedores = await resProv.json();
+        if (resCol.ok) listaColores = await resCol.json();
+        if (resProd.ok) productos = await resProd.json();
+
+        actualizarMenuCategoriasPublico();
+        poblarSelectsAdmin();
+        actualizarDatalists();
+        renderizarFiltros();
+        renderizar();
+      } catch (err) {
+        console.error("Error al cargar datos de Supabase:", err);
       }
+    }
+
+    function obtenerIconoCategoria(nombre) {
+      const n = nombre.toLowerCase();
+      if (n.includes('calzado') || n.includes('zapatilla')) return 'fa-shoe-prints';
+      if (n.includes('indumentaria' ) || n.includes('ropa')) return 'fa-shirt';
+      if (n.includes('hogar') || n.includes('casa')) return 'fa-house';
+      if (n.includes('paraguay')) return 'fa-globe-americas';
+      if (n.includes('importado')) return 'fa-plane';
+      return 'fa-box-open';
+    }
+
+    function actualizarMenuCategoriasPublico() {
+      const contenedor = document.getElementById('contenedorMenuCategorias');
+      if (!contenedor) return;
+
+      // Botón "Todos"
+      let html = `
+        <button onclick="filtrarCategoria('Todas')" class="btn-cat group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer ${
+          categoriaSeleccionada === 'Todas' 
+            ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black shadow-lg shadow-amber-500/25 scale-105 border border-amber-300' 
+            : 'bg-gray-900/90 text-gray-400 border border-gray-800 hover:border-amber-500/40 hover:text-white hover:bg-gray-800'
+        }">
+          <i class="fa-solid fa-border-all ${categoriaSeleccionada === 'Todas' ? 'text-black' : 'text-amber-400'} group-hover:rotate-12 transition-transform"></i>
+          <span>Todos</span>
+        </button>
+      `;
+      
+      // Categorías dinámicas de la Base de Datos
+      listaCategorias.forEach(cat => {
+        const activa = categoriaSeleccionada.toLowerCase() === cat.nombre.toLowerCase();
+        const icono = obtenerIconoCategoria(cat.nombre);
+        html += `
+          <button onclick="filtrarCategoria('${cat.nombre}')" class="btn-cat group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer ${
+            activa 
+              ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black shadow-lg shadow-amber-500/25 scale-105 border border-amber-300' 
+              : 'bg-gray-900/90 text-gray-400 border border-gray-800 hover:border-amber-500/40 hover:text-white hover:bg-gray-800'
+          }">
+            <i class="fa-solid ${icono} ${activa ? 'text-black' : 'text-amber-400'} group-hover:scale-110 transition-transform"></i>
+            <span>${cat.nombre}</span>
+          </button>
+        `;
+      });
+
+      contenedor.innerHTML = html;
+    }
+
+    function poblarSelectsAdmin() {
+      // Categorías
+      const selCat = document.getElementById('pCategoriaSelect');
+      if (selCat) {
+        selCat.innerHTML = listaCategorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('') +
+                           `<option value="__nuevo__">[ + Agregar nueva categoría... ]</option>`;
+        actualizarSubcategoriasAdmin();
+      }
+
+      // Proveedores
+      const selProv = document.getElementById('pProveedorSelect');
+      if (selProv) {
+        selProv.innerHTML = listaProveedores.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('') +
+                            `<option value="__nuevo__">[ + Agregar nuevo proveedor... ]</option>`;
+      }
+
+      // Colores
+      const selCol = document.getElementById('pColorSelect');
+      if (selCol) {
+        selCol.innerHTML = listaColores.map(co => `<option value="${co.id}">${co.nombre}</option>`).join('') +
+                           `<option value="__nuevo__">[ + Agregar nuevo color... ]</option>`;
+      }
+    }
+
+    function actualizarSubcategoriasAdmin() {
+      const selCat = document.getElementById('pCategoriaSelect');
+      const selSub = document.getElementById('pSubcategoriaSelect');
+      if (!selCat || !selSub) return;
+
+      const catId = selCat.value;
+      if (catId === '__nuevo__') {
+        document.getElementById('pCategoriaNueva').classList.remove('hidden');
+        selSub.innerHTML = `<option value="__nuevo__">[ + Agregar nueva subcategoría... ]</option>`;
+        document.getElementById('pSubcategoriaNueva').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('pCategoriaNueva').classList.add('hidden');
+        document.getElementById('pCategoriaNueva').value = '';
+      }
+
+      const subsFiltradas = listaSubcategorias.filter(s => s.categoria_id == catId);
+      selSub.innerHTML = subsFiltradas.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('') +
+                         `<option value="__nuevo__">[ + Agregar nueva subcategoría... ]</option>`;
+      verificarNuevaSubcategoria();
+    }
+
+    function verificarNuevaSubcategoria() {
+      const selSub = document.getElementById('pSubcategoriaSelect');
+      const inputSubNueva = document.getElementById('pSubcategoriaNueva');
+      if (selSub.value === '__nuevo__') {
+        inputSubNueva.classList.remove('hidden');
+      } else {
+        inputSubNueva.classList.add('hidden');
+        inputSubNueva.value = '';
+      }
+    }
+
+    function verificarNuevoProveedor() {
+      const sel = document.getElementById('pProveedorSelect');
+      const input = document.getElementById('pProveedorNuevo');
+      if (sel.value === '__nuevo__') input.classList.remove('hidden');
+      else { input.classList.add('hidden'); input.value = ''; }
+    }
+
+    function verificarNuevoColor() {
+      const sel = document.getElementById('pColorSelect');
+      const input = document.getElementById('pColorNuevo');
+      if (sel.value === '__nuevo__') input.classList.remove('hidden');
+      else { input.classList.add('hidden'); input.value = ''; }
     }
 
     function actualizarDatalists() {
       const marcas = [...new Set(productos.map(p => p.marca ? p.marca.trim() : '').filter(m => m))];
       const modelos = [...new Set(productos.map(p => p.nombre ? p.nombre.trim() : '').filter(m => m))];
 
-      document.getElementById('listaMarcas').innerHTML = marcas.map(m => `<option value="${m}">`).join('');
-      document.getElementById('listaModelos').innerHTML = modelos.map(m => `<option value="${m}">`).join('');
+      const dm = document.getElementById('listaMarcas');
+      const dmod = document.getElementById('listaModelos');
+      if (dm) dm.innerHTML = marcas.map(m => `<option value="${m}">`).join('');
+      if (dmod) dmod.innerHTML = modelos.map(m => `<option value="${m}">`).join('');
     }
 
     function renderizarFiltros() {
-      // Filtro Marcas
+      // Filtro Marcas (con flex-wrap para que bajen de línea y no se corten)
       const contenedorMarcas = document.getElementById('contenedorFiltroMarcas');
       if (contenedorMarcas) {
         const marcas = productos.map(p => p.marca ? p.marca.trim() : '').filter(m => m !== '');
         const marcasUnicas = ["Todas", ...new Set(marcas)];
 
-        contenedorMarcas.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-1 uppercase whitespace-nowrap">Marca:</span>` +
-          marcasUnicas.map(marca => `
-            <button onclick="filtrarMarca('${marca}')" class="btn-marca ${marcaSeleccionada.toLowerCase() === marca.toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-amber-500/50'} px-3 py-1 rounded-xl text-xs font-semibold transition cursor-pointer whitespace-nowrap">
-              ${marca}
-            </button>
-          `).join('');
+        contenedorMarcas.innerHTML = `
+          <div class="w-full flex items-center flex-wrap gap-2">
+            <span class="text-xs font-bold text-gray-400 mr-2 uppercase tracking-wider">Marca:</span>
+            ${marcasUnicas.map(marca => `
+              <button onclick="filtrarMarca('${marca}')" class="btn-marca ${marcaSeleccionada.toLowerCase() === marca.toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/27 scale-105' : 'bg-gray-800 text-gray-300 border border-gray-700 hover:border-amber-500/50 hover:text-white'} px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+                ${marca}
+              </button>
+            `).join('')}
+          </div>
+        `;
       }
 
-      // Filtro Talles
+      // Filtro Talles (con flex-wrap para que bajen de línea ordenadamente)
       const contenedorTalles = document.getElementById('contenedorFiltroTalles');
       if (contenedorTalles) {
         let todosTalles = [];
@@ -309,12 +464,16 @@
         });
         const tallesUnicos = ["Todos", ...new Set(todosTalles.filter(t => t !== ''))].sort((a,b) => a - b);
 
-        contenedorTalles.innerHTML = `<span class="text-xs font-bold text-gray-400 mr-1 uppercase whitespace-nowrap">Talle:</span>` +
-          tallesUnicos.map(talle => `
-            <button onclick="filtrarTalle('${talle}')" class="btn-talle ${talleSeleccionado.toString().toLowerCase() === talle.toString().toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/20' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:border-amber-500/50'} px-2.5 py-1 rounded-xl text-xs font-semibold transition cursor-pointer whitespace-nowrap">
-              ${talle}
-            </button>
-          `).join('');
+        contenedorTalles.innerHTML = `
+          <div class="w-full flex items-center flex-wrap gap-2">
+            <span class="text-xs font-bold text-gray-400 mr-2 uppercase tracking-wider">Talle:</span>
+            ${tallesUnicos.map(talle => `
+              <button onclick="filtrarTalle('${talle}')" class="btn-talle ${talleSeleccionado.toString().toLowerCase() === talle.toString().toLowerCase() ? 'bg-amber-500 text-black font-black shadow-md shadow-amber-500/27 scale-105' : 'bg-gray-800 text-gray-300 border border-gray-700 hover:border-amber-500/50 hover:text-white'} px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+                ${talle}
+              </button>
+            `).join('')}
+          </div>
+        `;
       }
     }
 
@@ -329,15 +488,6 @@
         </button>
       `;
       contenedor.appendChild(div);
-    }
-
-    function obtenerArrayFotosInput() {
-      const inputs = document.querySelectorAll('.input-url-foto');
-      let urls = [];
-      inputs.forEach(input => {
-        if (input.value.trim() !== '') urls.push(input.value.trim());
-      });
-      return urls;
     }
 
     function generarRangoTalles() {
@@ -359,20 +509,6 @@
 
     function cambiarVarianteColor(grupoClave, prodId) {
       varianteSeleccionada[grupoClave] = prodId;
-      fotoIndiceTarjeta[prodId] = 0; // Reiniciar foto a la primera de la variante
-      renderizar();
-    }
-
-    // DESPLAZAR FOTOS EN LA TARJETA CON FLECHAS
-    function cambiarFotoTarjeta(e, prodId, direccion, totalFotos) {
-      e.stopPropagation(); // Evitar abrir el visor al hacer clic en la flecha
-      if (!fotoIndiceTarjeta[prodId]) fotoIndiceTarjeta[prodId] = 0;
-      
-      let nuevoIndice = fotoIndiceTarjeta[prodId] + direccion;
-      if (nuevoIndice < 0) nuevoIndice = totalFotos - 1;
-      if (nuevoIndice >= totalFotos) nuevoIndice = 0;
-      
-      fotoIndiceTarjeta[prodId] = nuevoIndice;
       renderizar();
     }
 
@@ -382,29 +518,61 @@
       return str.split(/[\n,]+/).map(f => f.trim()).filter(f => f !== '');
     }
 
+    // ZOOM CON NAVEGACIÓN Y MINIATURAS
     function abrirZoom(fotoField, indiceInicial = 0) {
       fotosActualesZoom = obtenerArrayFotos(fotoField);
       if (fotosActualesZoom.length === 0) return;
-      mostrarFotoZoom(indiceInicial);
+      indiceZoomActual = indiceInicial;
+      mostrarFotoZoom();
       document.getElementById('modalImagen').classList.remove('hidden');
     }
 
-    function mostrarFotoZoom(indice) {
+    function mostrarFotoZoom() {
       const imgElem = document.getElementById('imgZoomAmpliada');
-      imgElem.src = fotosActualesZoom[indice];
+      imgElem.src = fotosActualesZoom[indiceZoomActual];
 
       const contenedorMini = document.getElementById('galeriaMiniaturasZoom');
       if (fotosActualesZoom.length > 1) {
         contenedorMini.innerHTML = fotosActualesZoom.map((url, idx) => `
-          <img src="${url}" onclick="mostrarFotoZoom(${idx})" class="w-16 h-16 object-cover rounded-xl border-2 ${idx === indice ? 'border-amber-500 scale-105' : 'border-gray-800 opacity-60'} cursor-pointer hover:opacity-100 transition">
+          <img src="${url}" onclick="indiceZoomActual=${idx}; mostrarFotoZoom();" class="w-16 h-16 object-cover rounded-xl border-2 ${idx === indiceZoomActual ? 'border-amber-500 scale-105' : 'border-gray-800 opacity-60'} cursor-pointer hover:opacity-100 transition">
         `).join('');
       } else {
         contenedorMini.innerHTML = '';
       }
     }
 
+    function cambiarFotoZoom(direccion) {
+      if (fotosActualesZoom.length <= 1) return;
+      indiceZoomActual += direccion;
+      if (indiceZoomActual < 0) indiceZoomActual = fotosActualesZoom.length - 1;
+      if (indiceZoomActual >= fotosActualesZoom.length) indiceZoomActual = 0;
+      mostrarFotoZoom();
+    }
+
     function cerrarZoom() {
       document.getElementById('modalImagen').classList.add('hidden');
+    }
+
+    function filtrarCategoria(cat) {
+      categoriaSeleccionada = cat;
+      actualizarMenuCategoriasPublico();
+      renderizar();
+    }
+
+    function filtrarMarca(marca) {
+      marcaSeleccionada = marca;
+      renderizarFiltros();
+      renderizar();
+    }
+
+    function filtrarTalle(talle) {
+      talleSeleccionado = talle;
+      renderizarFiltros();
+      renderizar();
+    }
+
+    function filtrarProductos() {
+      renderizar();
     }
 
     function renderizar() {
@@ -417,17 +585,17 @@
       const filtrados = productos.filter(p => {
         const marca = p.marca || '';
         const nombre = p.nombre || '';
-        const color = p.color || '';
-        const cat = p.categoria || 'Calzado';
         
-        let listaTalles = [];
-        if (Array.isArray(p.talles)) listaTalles = p.talles;
-        else if (typeof p.talles === 'string') listaTalles = p.talles.split(',').map(t => t.trim());
+        let catNombre = 'Calzado';
+        const encontradaCat = listaCategorias.find(c => c.id === p.categoria_id);
+        if (encontradaCat) catNombre = encontradaCat.nombre;
 
-        const coincideCat = categoriaSeleccionada === "Todas" || cat.toLowerCase() === categoriaSeleccionada.toLowerCase();
+        const coincideCat = categoriaSeleccionada === "Todas" || catNombre.toLowerCase() === categoriaSeleccionada.toLowerCase();
         const coincideMarca = marcaSeleccionada === "Todas" || marca.toLowerCase() === marcaSeleccionada.toLowerCase();
+        
+        let listaTalles = Array.isArray(p.talles) ? p.talles : String(p.talles || '').split(',').map(t => t.trim());
         const coincideTalle = talleSeleccionado === "Todos" || listaTalles.some(t => t.toLowerCase() === talleSeleccionado.toLowerCase());
-        const coincideBusqueda = nombre.toLowerCase().includes(busqueda) || marca.toLowerCase().includes(busqueda) || color.toLowerCase().includes(busqueda);
+        const coincideBusqueda = nombre.toLowerCase().includes(busqueda) || marca.toLowerCase().includes(busqueda);
         
         return coincideCat && coincideMarca && coincideTalle && coincideBusqueda;
       });
@@ -437,7 +605,7 @@
         return;
       }
 
-      // AGRUPACIÓN POR MARCA + NOMBRE + PRECIO
+      // Agrupación por Marca + Nombre + Precio
       const grupos = {};
       filtrados.forEach(p => {
         const clave = `${(p.marca || '').trim().toLowerCase()}_${(p.nombre || '').trim().toLowerCase()}_${p.precio}`;
@@ -447,54 +615,39 @@
 
       grid.innerHTML = Object.keys(grupos).map(claveGrupo => {
         const variantes = grupos[claveGrupo];
-        
         let idActivo = varianteSeleccionada[claveGrupo];
         let p = variantes.find(v => v.id === idActivo) || variantes[0];
 
-        let listaTalles = [];
-        if (Array.isArray(p.talles)) listaTalles = p.talles;
-        else if (typeof p.talles === 'string') listaTalles = p.talles.split(',').map(t => t.trim());
-
+        let listaTalles = Array.isArray(p.talles) ? p.talles : String(p.talles || '').split(',').map(t => t.trim());
         const listaFotos = obtenerArrayFotos(p.foto);
-        const idxFotoActual = fotoIndiceTarjeta[p.id] || 0;
-        const fotoPrincipal = listaFotos[idxFotoActual] || 'https://via.placeholder.com/400x400?text=Foto+No+Disponible';
+        const fotoPrincipal = listaFotos[0] || 'https://via.placeholder.com/400x400?text=Foto+No+Disponible';
         const fotosEscapadas = JSON.stringify(p.foto || '').replace(/"/g, '&quot;');
 
         if (!tallesSeleccionados[p.id] && listaTalles.length > 0) {
           tallesSeleccionados[p.id] = listaTalles[0];
         }
         const talleElegido = tallesSeleccionados[p.id] || (listaTalles[0] || 'A consultar');
-        const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} (Color: ${p.color || 'Estándar'}) Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
+        const linkWp = `https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(`Hola Zapas Chimú! Me interesa el modelo ${p.marca || ''} ${p.nombre || ''} Talle: ${talleElegido} ($${Number(p.precio || 0).toLocaleString('es-AR')})`);
 
         const estaDisponible = p.disponible !== false;
 
         return `
           <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition duration-300 group">
             <div>
-              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, ${idxFotoActual})">
+              <div class="relative h-64 bg-gray-950 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="abrirZoom(${fotosEscapadas}, 0)">
                 <img src="${fotoPrincipal}" alt="${p.nombre}" class="w-full h-full object-contain group-hover:scale-105 transition duration-300 ${!estaDisponible ? 'opacity-75' : ''}" onerror="this.src='https://via.placeholder.com/400x400?text=Foto+No+Disponible'">
                 
-                <!-- BADGE MARCA -->
                 <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md border border-amber-500/30 text-xs px-3 py-1 rounded-full text-amber-300 font-black uppercase tracking-wider">${p.marca || 'Zapatillas'}</span>
                 
-                <!-- BADGE AGOTADO -->
                 ${!estaDisponible ? `
                   <span class="absolute top-3 right-3 bg-red-600/90 text-white font-black text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg border border-red-400/50 flex items-center gap-1 z-10">
                     <i class="fa-solid fa-circle-xmark"></i> Agotado
                   </span>
                 ` : ''}
 
-                <!-- FLECHAS DE NAVEGACIÓN EN FOTOS (SE MUESTRAN SI HAY MÁS DE 1 FOTO) -->
                 ${listaFotos.length > 1 ? `
-                  <button onclick="cambiarFotoTarjeta(event, ${p.id}, -1, ${listaFotos.length})" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-amber-500 hover:text-black text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition z-20">
-                    <i class="fa-solid fa-chevron-left text-xs"></i>
-                  </button>
-                  <button onclick="cambiarFotoTarjeta(event, ${p.id}, 1, ${listaFotos.length})" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-amber-500 hover:text-black text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition z-20">
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                  </button>
-
                   <span class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-[10px] px-2.5 py-1 rounded-lg text-white font-bold flex items-center gap-1.5 border border-gray-700 z-10">
-                    <i class="fa-solid fa-images text-amber-400"></i> ${idxFotoActual + 1}/${listaFotos.length}
+                    <i class="fa-solid fa-images text-amber-400"></i> ${listaFotos.length} fotos
                   </span>
                 ` : ''}
               </div>
@@ -503,7 +656,6 @@
                 <h3 class="font-black text-lg text-white mb-1 tracking-tight">${p.nombre}</h3>
                 <p class="text-2xl font-black text-amber-400 mb-3 tracking-tight">$ ${Number(p.precio || 0).toLocaleString('es-AR')}</p>
                 
-                <!-- VARIANTES / COLORES -->
                 ${variantes.length > 1 ? `
                   <div class="mb-4">
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1.5">COLORES / OPCIONES (${variantes.length}):</p>
@@ -512,7 +664,7 @@
                         const fotoVar = obtenerArrayFotos(v.foto)[0] || '';
                         const esActiva = v.id === p.id;
                         return `
-                          <button onclick="cambiarVarianteColor('${claveGrupo}', ${v.id})" class="w-9 h-9 rounded-lg border-2 overflow-hidden transition cursor-pointer ${esActiva ? 'border-amber-500 scale-110 shadow-lg shadow-amber-500/20' : 'border-gray-700 opacity-60 hover:opacity-100'}" title="${v.color || 'Color'}">
+                          <button onclick="cambiarVarianteColor('${claveGrupo}', ${v.id})" class="w-9 h-9 rounded-lg border-2 overflow-hidden transition cursor-pointer ${esActiva ? 'border-amber-500 scale-110 shadow-lg shadow-amber-500/20' : 'border-gray-700 opacity-60 hover:opacity-100'}">
                             <img src="${fotoVar}" class="w-full h-full object-cover">
                           </button>
                         `;
@@ -548,7 +700,7 @@
       }).join('');
     }
 
-    // Inicializamos el cliente oficial de Supabase Auth
+    // AUTENTICACIÓN ADMIN EN SUPABASE
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function abrirModalAdmin() {
@@ -557,88 +709,31 @@
         return;
       }
 
-      // Pedimos el correo y la contraseña que registraste en Supabase
       const email = prompt("📧 Ingrese su correo de administrador:");
       if (!email) return;
       const password = prompt("🔑 Ingrese su contraseña:");
       if (!password) return;
 
       try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: email.trim(),
-          password: password.trim(),
-        });
-
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
-          alert("❌ Credenciales incorrectas o acceso no autorizado.");
+          alert("❌ Error de acceso: " + error.message);
           return;
         }
-
-        // Si la autenticación es exitosa, se abre el panel
         esAdmin = true;
+        document.getElementById('btnAdminAuth').innerHTML = `<i class="fa-solid fa-unlock text-amber-400"></i> <span class="hidden sm:inline">Panel Admin OK</span>`;
         document.getElementById('panelAdmin').classList.remove('hidden');
-        alert("✅ ¡Bienvenido, Administrador!");
         renderizar();
       } catch (err) {
-        console.error(err);
-        alert("❌ Error de red al intentar iniciar sesión.");
+        alert("Error al iniciar sesión.");
       }
-    }
-
-    async function cerrarSesionAdmin() {
-      await supabaseClient.auth.signOut(); // Cierra sesión de forma segura en Supabase
-      esAdmin = false;
-      document.getElementById('panelAdmin').classList.add('hidden');
-      cancelarEdicion();
-      renderizar();
     }
 
     function cerrarSesionAdmin() {
       esAdmin = false;
       document.getElementById('panelAdmin').classList.add('hidden');
-      cancelarEdicion();
+      document.getElementById('btnAdminAuth').innerHTML = `<i class="fa-solid fa-lock"></i> <span class="hidden sm:inline">Modo Admin</span>`;
       renderizar();
-    }
-
-    function cargarDatosEdicion(id) {
-      const prod = productos.find(p => p.id === id);
-      if (!prod) return;
-
-      document.getElementById('pId').value = prod.id;
-      document.getElementById('pCategoria').value = prod.categoria || 'Calzado';
-      document.getElementById('pNombre').value = prod.nombre;
-      document.getElementById('pMarca').value = prod.marca;
-      document.getElementById('pColor').value = prod.color || '';
-      document.getElementById('pProveedor').value = prod.proveedor || '';
-      document.getElementById('pPrecio').value = prod.precio;
-      document.getElementById('pTalles').value = Array.isArray(prod.talles) ? prod.talles.join(', ') : prod.talles;
-      document.getElementById('pDisponible').checked = prod.disponible !== false;
-      
-      const contenedor = document.getElementById('contenedorCajasUrls');
-      contenedor.innerHTML = '';
-      const listaFotos = obtenerArrayFotos(prod.foto);
-      if (listaFotos.length > 0) {
-        listaFotos.forEach(url => agregarCajaUrl(url));
-      } else {
-        agregarCajaUrl('');
-      }
-
-      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editando Producto #${prod.id}`;
-      document.getElementById('btnSubmitProd').innerText = "Actualizar Producto";
-      document.getElementById('btnCancelarEdicion').classList.remove('hidden');
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function cancelarEdicion() {
-      document.getElementById('formProd').reset();
-      document.getElementById('pId').value = "";
-      document.getElementById('pDisponible').checked = true;
-      document.getElementById('contenedorCajasUrls').innerHTML = '';
-      agregarCajaUrl('');
-      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto`;
-      document.getElementById('btnSubmitProd').innerText = "Guardar Producto en la Nube";
-      document.getElementById('btnCancelarEdicion').classList.add('hidden');
     }
 
     async function guardarProducto(e) {
@@ -655,19 +750,107 @@
       const fotoTextoPlano = listaLimpia.join(', ');
       const estaDisponible = document.getElementById('pDisponible').checked;
 
-      const datosProducto = {
-        categoria: document.getElementById('pCategoria').value,
-        nombre: document.getElementById('pNombre').value.trim(),
-        marca: document.getElementById('pMarca').value.trim(),
-        color: document.getElementById('pColor').value.trim(),
-        proveedor: document.getElementById('pProveedor').value.trim(),
-        precio: Number(document.getElementById('pPrecio').value),
-        talles: arrayTalles,
-        foto: fotoTextoPlano,
-        disponible: estaDisponible
+      let categoria_id = document.getElementById('pCategoriaSelect').value;
+      let subcategoria_id = document.getElementById('pSubcategoriaSelect').value;
+      let proveedor_id = document.getElementById('pProveedorSelect').value;
+      let color_id = document.getElementById('pColorSelect').value;
+
+      // Normalizar la Marca ingresada para evitar duplicados por mayúsculas/minúsculas (ej: "nike" -> "Nike")
+      let marcaInput = document.getElementById('pMarca').value.trim();
+      const marcaExistente = productos.find(p => p.marca && p.marca.toLowerCase() === marcaInput.toLowerCase());
+      if (marcaExistente) {
+        marcaInput = marcaExistente.marca; // Reutiliza la capitalización que ya existía
+      }
+
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
       };
 
       try {
+        // 1. CATEGORÍA: Verificar si ya existe (ignorando mayúsculas/minúsculas)
+        if (categoria_id === '__nuevo__') {
+          const nuevaCatNombre = document.getElementById('pCategoriaNueva').value.trim();
+          if (!nuevaCatNombre) { alert("Escriba el nombre de la nueva categoría"); return; }
+          
+          const catEncontrada = listaCategorias.find(c => c.nombre.toLowerCase() === nuevaCatNombre.toLowerCase());
+          if (catEncontrada) {
+            categoria_id = catEncontrada.id; // Ya existía, usamos su ID
+          } else {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/categorias`, {
+              method: 'POST', headers, body: JSON.stringify({ nombre: nuevaCatNombre })
+            });
+            const data = await res.json();
+            categoria_id = data[0].id;
+          }
+        }
+
+        // 2. SUBCATEGORÍA: Verificar si ya existe dentro de esa categoría (ignorando mayúsculas/minúsculas)
+        if (subcategoria_id === '__nuevo__') {
+          const nuevaSubNombre = document.getElementById('pSubcategoriaNueva').value.trim();
+          if (!nuevaSubNombre) { alert("Escriba el nombre de la nueva subcategoría"); return; }
+          
+          const subEncontrada = listaSubcategorias.find(s => s.categoria_id == categoria_id && s.nombre.toLowerCase() === nuevaSubNombre.toLowerCase());
+          if (subEncontrada) {
+            subcategoria_id = subEncontrada.id;
+          } else {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/subcategorias`, {
+              method: 'POST', headers, body: JSON.stringify({ categoria_id: parseInt(categoria_id), nombre: nuevaSubNombre })
+            });
+            const data = await res.json();
+            subcategoria_id = data[0].id;
+          }
+        }
+
+        // 3. PROVEEDOR: Verificar si ya existe (ignorando mayúsculas/minúsculas)
+        if (proveedor_id === '__nuevo__') {
+          const nuevoProvNombre = document.getElementById('pProveedorNuevo').value.trim();
+          if (!nuevoProvNombre) { alert("Escriba el nombre del nuevo proveedor"); return; }
+          
+          const provEncontrado = listaProveedores.find(p => p.nombre.toLowerCase() === nuevoProvNombre.toLowerCase());
+          if (provEncontrado) {
+            proveedor_id = provEncontrado.id;
+          } else {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/proveedores`, {
+              method: 'POST', headers, body: JSON.stringify({ nombre: nuevoProvNombre })
+            });
+            const data = await res.json();
+            proveedor_id = data[0].id;
+          }
+        }
+
+        // 4. COLOR: Verificar si ya existe (ignorando mayúsculas/minúsculas)
+        if (color_id === '__nuevo__') {
+          const nuevoColNombre = document.getElementById('pColorNuevo').value.trim();
+          if (!nuevoColNombre) { alert("Escriba el nombre del nuevo color"); return; }
+          
+          const colEncontrado = listaColores.find(co => co.nombre.toLowerCase() === nuevoColNombre.toLowerCase());
+          if (colEncontrado) {
+            color_id = colEncontrado.id;
+          } else {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/colores`, {
+              method: 'POST', headers, body: JSON.stringify({ nombre: nuevoColNombre })
+            });
+            const data = await res.json();
+            color_id = data[0].id;
+          }
+        }
+
+        const datosProducto = {
+          categoria_id: parseInt(categoria_id),
+          subcategoria_id: parseInt(subcategoria_id),
+          proveedor_id: parseInt(proveedor_id),
+          color_id: parseInt(color_id),
+          marca: marcaInput,
+          nombre: document.getElementById('pNombre').value.trim(),
+          precio: Number(document.getElementById('pPrecio').value),
+          talles: arrayTalles,
+          foto: fotoTextoPlano,
+          disponible: estaDisponible
+        };
+
         let res;
         if (idEditando) {
           res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${idEditando}`, {
@@ -696,7 +879,7 @@
         if (res.ok) {
           alert(idEditando ? "✅ Producto actualizado en la nube." : "✅ Producto subido correctamente.");
           cancelarEdicion();
-          obtenerProductos();
+          obtenerMaestrasYProductos();
         } else {
           alert("❌ Error al guardar en Supabase: " + await res.text());
         }
@@ -706,94 +889,102 @@
       }
     }
 
-    async function borrarProducto(id) {
-      if (!confirm("¿Estás seguro de borrar este producto?")) return;
+    function obtenerArrayFotosInput() {
+      const inputs = document.querySelectorAll('.input-url-foto');
+      let urls = [];
+      inputs.forEach(input => {
+        if (input.value.trim() !== '') urls.push(input.value.trim());
+      });
+      return urls;
+    }
 
+    async function borrarProducto(id) {
+      if (!confirm("¿Estás seguro de eliminar este producto?")) return;
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`, {
           method: 'DELETE',
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
         if (res.ok) {
-          alert("🗑️ Producto borrado de la nube.");
-          obtenerProductos();
+          obtenerMaestrasYProductos();
         } else {
-          alert("❌ No se pudo borrar el producto.");
+          alert("Error al eliminar.");
         }
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        alert("Error de red.");
+      }
+    }
+
+    function cargarDatosEdicion(id) {
+      const p = productos.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('pId').value = p.id;
+      if (p.categoria_id) document.getElementById('pCategoriaSelect').value = p.categoria_id;
+      actualizarSubcategoriasAdmin();
+      if (p.subcategoria_id) document.getElementById('pSubcategoriaSelect').value = p.subcategoria_id;
+      if (p.proveedor_id) document.getElementById('pProveedorSelect').value = p.proveedor_id;
+      if (p.color_id) document.getElementById('pColorSelect').value = p.color_id;
+
+      document.getElementById('pMarca').value = p.marca || '';
+      document.getElementById('pNombre').value = p.nombre || '';
+      document.getElementById('pPrecio').value = p.precio || '';
+      
+      let tallesStr = Array.isArray(p.talles) ? p.talles.join(', ') : p.talles;
+      document.getElementById('pTalles').value = tallesStr || '';
+      document.getElementById('pDisponible').checked = p.disponible !== false;
+
+      const contenedor = document.getElementById('contenedorCajasUrls');
+      contenedor.innerHTML = '';
+      const listaF = obtenerArrayFotos(p.foto);
+      if (listaF.length > 0) {
+        listaF.forEach(url => agregarCajaUrl(url));
+      } else {
+        agregarCajaUrl('');
+      }
+
+      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editando Producto #${id}`;
+      document.getElementById('btnCancelarEdicion').classList.remove('hidden');
+      document.getElementById('panelAdmin').classList.remove('hidden');
+      window.scrollTo({ top: document.getElementById('panelAdmin').offsetTop - 50, behavior: 'smooth' });
+    }
+
+    function cancelarEdicion() {
+      document.getElementById('formProd').reset();
+      document.getElementById('pId').value = '';
+      document.getElementById('tituloFormAdmin').innerHTML = `<i class="fa-solid fa-user-gear"></i> Cargar Nuevo Producto`;
+      document.getElementById('btnCancelarEdicion').classList.add('hidden');
+      document.getElementById('contenedorCajasUrls').innerHTML = '';
+      agregarCajaUrl('');
     }
 
     async function marcarTodosAgotados() {
-      if (!confirm("⚠️ ¿Estás seguro de marcar TODOS los productos como AGOTADOS?")) return;
-
+      if (!confirm("¿Deseas marcar TODOS los productos como agotados?")) return;
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=gt.0`, {
           method: 'PATCH',
-          headers: { 
-            'apikey': SUPABASE_KEY, 
-            'Authorization': `Bearer ${SUPABASE_KEY}`, 
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ disponible: false })
         });
-
-        if (res.ok) {
-          alert("✅ Todos los productos fueron marcados como agotados.");
-          obtenerProductos();
-        } else {
-          alert("❌ Error al actualizar los productos.");
-        }
-      } catch (err) { console.error(err); }
+        if (res.ok) { obtenerMaestrasYProductos(); }
+      } catch (err) { alert("Error al actualizar."); }
     }
 
-    function filtrarCategoria(cat) {
-      categoriaSeleccionada = cat;
-      document.querySelectorAll('.btn-cat').forEach(b => {
-        if (b.innerText.toLowerCase().includes(cat.toLowerCase()) || (cat === 'Todas' && b.innerText === 'Todos')) {
-          b.className = 'btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap bg-amber-500 text-black shadow-md shadow-amber-500/20';
-        } else {
-          b.className = 'btn-cat px-4 py-1.5 rounded-full transition whitespace-nowrap text-gray-400 hover:text-white hover:bg-gray-800';
-        }
-      });
-      renderizar();
-    }
-
-    function filtrarMarca(marca) {
-      marcaSeleccionada = marca;
-      renderizarFiltros();
-      renderizar();
-    }
-
-    function filtrarTalle(talle) {
-      talleSeleccionado = talle;
-      renderizarFiltros();
-      renderizar();
-    }
-
-    function filtrarProductos() { renderizar(); }
-
-    // MODAL SUGERENCIAS
     function abrirModalSugerencia() {
       document.getElementById('modalSugerencia').classList.remove('hidden');
     }
-
     function cerrarModalSugerencia() {
       document.getElementById('modalSugerencia').classList.add('hidden');
     }
-
     function enviarSugerenciaWhatsApp() {
-      const mod = document.getElementById('sugModelo').value.trim();
-      const tal = document.getElementById('sugTalle').value.trim();
-      const det = document.getElementById('sugDetalle').value.trim();
+      const modelo = document.getElementById('sugModelo').value.trim();
+      const talle = document.getElementById('sugTalle').value.trim();
+      const detalle = document.getElementById('sugDetalle').value.trim();
 
-      if (!mod) {
-        alert("Por favor ingresá al menos el modelo o marca que buscás.");
-        return;
-      }
+      if (!modelo) { alert("Por favor indicá el modelo o marca."); return; }
 
-      const mensaje = `Hola Zapas Chimú! Me gustaría encargar/consultar por un producto a pedido:%0A%0A📌 *Modelo/Marca:* ${mod}%0A📏 *Talle:* ${tal || 'A confirmar'}%0A📝 *Detalles:* ${det || 'Sin detalles adicionales'}`;
-      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${mensaje}`, '_blank');
+      const msg = `Hola Zapas Chimú! 👟 Busco un producto a pedido:\n\n• Modelo: ${modelo}\n• Talle: ${talle || 'No especificado'}\n• Detalles: ${detalle || 'Sin detalles'}`;
+      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=` + encodeURIComponent(msg), '_blank');
       cerrarModalSugerencia();
     }
   </script>
